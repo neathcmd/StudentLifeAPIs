@@ -13,7 +13,7 @@ services:
 
   app:
     build: .
-    container_name: studentLife_app
+    container_name: studentLife_api
     restart: "no"
     depends_on:
       - db
