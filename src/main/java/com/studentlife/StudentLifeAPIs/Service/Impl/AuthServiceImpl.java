@@ -46,14 +46,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ApiResponse<?> register(RegisterRequest request, HttpServletResponse response) {
 
-        Users user = userRepository.findByEmail(request.getEmail())
-                .or(() -> userRepository.findByUsername(request.getUsername()))
-                .orElseThrow(() -> validation("This email or username already been used. Please try another email or username"));
+        if (userRepository.findByEmail(request.getEmail()).isPresent()
+                || userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw validation("This email or username already been used.");
+        }
 
         // username email validation
         userValidatorUtil.validateRegister(request);
 
-        userMapper.toUserEntityRegisterUser(request);
+        Users user = userMapper.toUserEntityRegisterUser(request);
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
@@ -63,11 +64,11 @@ public class AuthServiceImpl implements AuthService {
         if (request.getRoles() != null && !request.getRoles().isEmpty()) {
             List<Roles> roles = roleRepository.findAllById(request.getRoles());
             if (roles.size() != request.getRoles().size()) {
-                throw badRequest("Some roles not found.");
+                throw badRequest("Roles not found.");
             }
             user.setRoles(new HashSet<>(roles));
         } else {
-            Roles defaultRole = roleRepository.findByName("user")
+            Roles defaultRole = roleRepository.findByName("student")
                     .orElseThrow(() -> notFound("Default role not found."));
             user.setRoles(new HashSet<>(Set.of(defaultRole)));
         }

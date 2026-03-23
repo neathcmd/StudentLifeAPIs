@@ -66,6 +66,7 @@ public class Users implements UserDetails {
     )
     private Set<Roles> roles = new HashSet<>();
 
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
