@@ -1,7 +1,11 @@
 package com.studentlife.StudentLifeAPIs.Entity;
 
+import com.studentlife.StudentLifeAPIs.Enum.AssignmentStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,26 +19,30 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class assignments {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String description;
 
+    @NotBlank
     @Column(nullable = false)
     private String subject;
 
-    @Column(nullable = false)
-    private Date due_date;
+    @NotNull
+    @Column(name = "due_date")
+    private Date dueDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private AssignmentStatus status = AssignmentStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

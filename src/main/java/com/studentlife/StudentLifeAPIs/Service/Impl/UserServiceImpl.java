@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
         if (request.getPhone() != null)         user.setPhone(request.getPhone());
         if (request.getUniversity() != null)    user.setUniversity(request.getUniversity());
         if (request.getMajor() != null)         user.setMajor(request.getMajor());
-        if (request.getAcademic_year() != null) user.setAcademic_year(request.getAcademic_year());
+        if (request.getAcademic_year() != null) user.setAcademicYear(request.getAcademic_year());
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
@@ -101,11 +101,11 @@ public class UserServiceImpl implements UserService {
     public void disableUser(Long id) {
         Users user = findUserOrThrow(id);
 
-        if (Boolean.FALSE.equals(user.getIs_active())) {
+        if (Boolean.FALSE.equals(user.getIsActive())) {
             throw new IllegalStateException("User is already disabled.");
         }
 
-        user.setIs_active(false);
+        user.setIsActive(false);
         userRepository.save(user);
     }
 

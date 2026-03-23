@@ -1,5 +1,6 @@
 package com.studentlife.StudentLifeAPIs.Utils;
 
+import com.studentlife.StudentLifeAPIs.DTO.Request.RegisterRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.UserCreateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.UserUpdateRequest;
 import com.studentlife.StudentLifeAPIs.Repository.UserRepository;
@@ -50,5 +51,20 @@ public class UserValidatorUtil {
         if (request.getPhone() == null || request.getPhone().isBlank()) {
             throw badRequest("Phone number must not be empty.");
         }
+
+    }
+
+    public void validateRegister(RegisterRequest request) {
+        // Validate username
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw badRequest("Username already exists");
+        }
+
+        // Validate email
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw badRequest("Email already exists");
+        }
+
+        validateEmailFormat(request.getEmail());
     }
 }

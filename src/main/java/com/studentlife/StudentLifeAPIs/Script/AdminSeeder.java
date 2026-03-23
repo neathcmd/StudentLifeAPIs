@@ -66,7 +66,7 @@ public class AdminSeeder implements CommandLineRunner {
                 .password(passwordEncoder.encode(adminPassword))
                 .phone("096 482 731")
                 .roles(new HashSet<>(Set.of(adminRole)))
-                .is_active(true)
+                .isActive(true)
                 .build();
 
         userRepository.save(admin);

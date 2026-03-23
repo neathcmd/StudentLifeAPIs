@@ -33,33 +33,30 @@ public class Users implements UserDetails {
     private Long id;
 
     @NotBlank
-    @Column(name = "fullname", nullable = false)
+    @Column(nullable = false)
     private String fullname;
 
     @NotBlank
-    @Column(name = "username", unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String username;
 
     @NotBlank
     @Email
-    @Column(name = "email", unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String email;
 
     @NotBlank
-    @Column(name = "password", nullable = false)
+    @Column(nullable = false)
     private String password;
 
-    @Column(name = "phone")
+    @Column(name = "phone_number")
     private String phone;
 
-    @Column(name = "university")
     private String university;
-
-    @Column(name = "major")
     private String major;
 
     @Column(name = "academic_year")
-    private String academic_year;
+    private String academicYear;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -69,8 +66,8 @@ public class Users implements UserDetails {
     )
     private Set<Roles> roles = new HashSet<>();
 
-    @Column(nullable = false)
-    private Boolean is_active = true;
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -104,6 +101,6 @@ public class Users implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return Boolean.TRUE.equals(is_active);
+        return Boolean.TRUE.equals(isActive);
     }
 }

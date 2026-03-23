@@ -1,6 +1,9 @@
 package com.studentlife.StudentLifeAPIs.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,22 +25,24 @@ public class schedules {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String description;
 
+    @Min(1) @Max(7)
     @Column(name = "day_of_week", nullable = false)
     private int dayOfWeek;
 
+    @NotBlank
     @Column(name = "start_time", nullable = false)
     private Instant startTime;
 
+    @NotBlank
     @Column(name = "end_time", nullable = false)
     private Instant endTime;
 
-    @Column(nullable = false)
     private String location;
 
     @ManyToOne(fetch = FetchType.LAZY)
