@@ -1,26 +1,24 @@
 package com.studentlife.StudentLifeAPIs.Service.Impl;
 
-import com.studentlife.StudentLifeAPIs.DTO.Request.UpdateUserRolesRequest;
+import com.studentlife.StudentLifeAPIs.DTO.Request.UserCreateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.UserUpdateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Response.PaginatedResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.UserResponse;
-import com.studentlife.StudentLifeAPIs.Entity.Roles;
 import com.studentlife.StudentLifeAPIs.Entity.Users;
 import com.studentlife.StudentLifeAPIs.Mapper.UserMapper;
 import com.studentlife.StudentLifeAPIs.Repository.RoleRepository;
 import com.studentlife.StudentLifeAPIs.Repository.UserRepository;
 import com.studentlife.StudentLifeAPIs.Service.UserService;
-import jakarta.persistence.EntityNotFoundException;
+import com.studentlife.StudentLifeAPIs.Utils.UserValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.notFound;
 
@@ -29,7 +27,8 @@ import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.n
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final UserValidatorUtil userValidatorUtil;
+    private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
     // ─── Read ────────────────────────────────────────────────────────────────
@@ -64,6 +63,18 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(findUserOrThrow(id));
     }
 
+    @Override
+    public UserResponse createUser(UserCreateRequest request) {
+        userValidatorUtil.validateCreate(request);
+
+        Users user = userMapper.toUserEntityCreateUser(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        Users savedUser = userRepository.save(user);
+
+        return userMapper.toUserResponse(savedUser);
+    }
+
     // ─── Update ──────────────────────────────────────────────────────────────
 
     @Override
@@ -77,20 +88,6 @@ public class UserServiceImpl implements UserService {
         if (request.getMajor() != null)         user.setMajor(request.getMajor());
         if (request.getAcademic_year() != null) user.setAcademicYear(request.getAcademic_year());
 
-        return userMapper.toUserResponse(userRepository.save(user));
-    }
-
-    @Override
-    @Transactional
-    public UserResponse updateUserRoles(Long id, UpdateUserRolesRequest request) {
-        Users user = findUserOrThrow(id);
-
-        Set<Roles> roles = request.getRoleIds().stream()
-                .map(roleId -> roleRepository.findById(roleId)
-                        .orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + roleId)))
-                .collect(Collectors.toSet());
-
-        user.setRoles(roles);
         return userMapper.toUserResponse(userRepository.save(user));
     }
 

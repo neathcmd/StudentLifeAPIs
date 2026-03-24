@@ -2,19 +2,19 @@ package com.studentlife.StudentLifeAPIs.Service.Impl;
 
 import com.studentlife.StudentLifeAPIs.DTO.Request.AuthRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.RegisterRequest;
-import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
-import com.studentlife.StudentLifeAPIs.DTO.Response.AuthResponse;
-import com.studentlife.StudentLifeAPIs.DTO.Response.RegisterResponse;
-import com.studentlife.StudentLifeAPIs.DTO.Response.UserResponse;
+import com.studentlife.StudentLifeAPIs.DTO.Response.*;
+import com.studentlife.StudentLifeAPIs.Entity.RefreshToken;
 import com.studentlife.StudentLifeAPIs.Entity.Roles;
 import com.studentlife.StudentLifeAPIs.Entity.Users;
 import com.studentlife.StudentLifeAPIs.Jwt.JwtService;
 import com.studentlife.StudentLifeAPIs.Mapper.UserMapper;
+import com.studentlife.StudentLifeAPIs.Repository.RefreshTokenRepository;
 import com.studentlife.StudentLifeAPIs.Repository.RoleRepository;
 import com.studentlife.StudentLifeAPIs.Repository.UserRepository;
 import com.studentlife.StudentLifeAPIs.Service.AuthService;
 import com.studentlife.StudentLifeAPIs.Utils.CookieUtil;
 import com.studentlife.StudentLifeAPIs.Utils.UserValidatorUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,10 +23,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.*;
 
@@ -36,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final UserMapper userMapper;
@@ -44,7 +49,101 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public ApiResponse<?> register(RegisterRequest request, HttpServletResponse response) {
+    public ApiResponse<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+
+        // ========================
+        // GET REFRESH TOKEN FROM COOKIE
+        // ========================
+        String refreshTokenValue = cookieUtil.getCookieValue(request, "refreshToken");
+
+        if (refreshTokenValue == null) {
+            throw unauthorized("Refresh token is missing.");
+        }
+
+        // ========================
+        // LOOK UP REFRESH TOKEN IN DATABASE
+        // ========================
+        RefreshToken oldToken = refreshTokenRepository
+                .findByToken(refreshTokenValue)
+                .orElseThrow(() -> unauthorized("Invalid refresh token."));
+
+        // ========================
+        // VALIDATE REFRESH TOKEN
+        // - Must not be revoked
+        // - Must not be expired
+        // ========================
+        if (oldToken.isRevoked() || oldToken.getExpiresAt().isBefore(Instant.now())) {
+            throw unauthorized("Request failed. Refresh token already expired!");
+        }
+
+        // ========================
+        // EXTRACT USER FROM TOKEN
+        // ========================
+        Users user = oldToken.getUsers();
+
+        // ========================
+        // DELETE THE OLD TOKEN AFTER GENERATE A NEW TOKEN
+        // ========================
+        refreshTokenRepository.delete(oldToken);
+
+        // ========================
+        // GENERATE NEW ACCESS TOKEN (JWT)
+        // ========================
+        String newAccessToken = jwtService.generateAccessToken(
+                String.valueOf(user.getId()),
+                user.getEmail(),
+                user.getUsername(),
+                user.getRoles()
+                        .stream()
+                        .map(Roles::getName)
+                        .toList()
+        );
+
+        // ========================
+        // CREATE NEW REFRESH TOKEN (SERVER-SIDE)
+        // ========================
+        String newRefreshToken = UUID.randomUUID().toString();
+
+        RefreshToken newToken = new RefreshToken();
+        newToken.setToken(newRefreshToken);
+        newToken.setUsers(user);
+        newToken.setExpiresAt(
+                Instant.now().plus(30, ChronoUnit.DAYS)
+        );
+
+        refreshTokenRepository.save(newToken);
+
+        // ========================
+        // STORE NEW TOKENS IN HTTP-ONLY COOKIES
+        // ========================
+        cookieUtil.setAuthCookie(
+                response,
+                "accessToken",
+                newAccessToken,
+                300
+        );
+
+        cookieUtil.setAuthCookie(
+                response,
+                "refreshToken",
+                newRefreshToken,
+                259200
+        );
+
+        return new ApiResponse<>(
+                201,
+                true,
+                "New access token generate successfully.",
+                new RefreshTokenResponse(newAccessToken)
+        );
+    }
+
+    @Override
+    public ApiResponse<?> register(
+            RegisterRequest request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse response
+    ) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()
                 || userRepository.findByUsername(request.getUsername()).isPresent()) {
@@ -78,9 +177,7 @@ public class AuthServiceImpl implements AuthService {
         // ========================
         // EXTRACT ROLE NAMES
         // ========================
-        // List<String> roles = mapperFunction.mapRolesToStringList(savedUser.getRoles());
         List<String> roles = user.getRoles()
-//        savedUser.getRoles()
                 .stream()
                 .map(Roles::getName)
                 .toList();
@@ -98,9 +195,17 @@ public class AuthServiceImpl implements AuthService {
         // ========================
         // GENERATE REFRESH TOKEN
         // ========================
-        String refreshTokenValue = jwtService.generateRefreshToken(
-                String.valueOf(user.getId())
+//        refreshTokenRepository.deleteByUsers(savedUser);
+        String refreshTokenValue = UUID.randomUUID().toString();
+
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setToken(refreshTokenValue);
+        refreshToken.setUsers(user);
+        refreshToken.setExpiresAt(
+                Instant.now().plus(30, ChronoUnit.DAYS)
         );
+
+        refreshTokenRepository.save(refreshToken);
 
         // ========================
         // SAVE TOKENS IN COOKIE
@@ -133,7 +238,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ApiResponse<?> login(AuthRequest request, HttpServletResponse response) {
+    @Transactional
+    public ApiResponse<?> login(AuthRequest request, HttpServletRequest httpRequest, HttpServletResponse response) {
 
         // ========================
         // VALIDATE USER CREDENTIAL WITH AUTHENTICATION MANAGER
@@ -158,7 +264,8 @@ public class AuthServiceImpl implements AuthService {
 
 
         // ========================
-        // EXTRACT ROLE NAME FROM AN EXISTING USER (Whoever was trying to Log in extract their role name then display it in the response.)
+        // EXTRACT ROLE NAME FROM AN EXISTING USER
+        // (Whoever was trying to Log in extract their role name then display it in the response.)
         // ========================
         List<String> roles = user.getRoles()
                 .stream()
@@ -183,9 +290,17 @@ public class AuthServiceImpl implements AuthService {
         // ========================
         // GENERATE REFRESH TOKEN
         // ========================
-        String refreshTokenValue = jwtService.generateRefreshToken(
-                String.valueOf(user.getId())
+        refreshTokenRepository.deleteByUsers(user);
+        String refreshTokenValue = UUID.randomUUID().toString();
+
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setToken(refreshTokenValue);
+        refreshToken.setUsers(user);
+        refreshToken.setExpiresAt(
+                Instant.now().plus(30, ChronoUnit.DAYS)
         );
+
+        refreshTokenRepository.save(refreshToken);
 
         // ========================
         // SAVE TOKENS IN COOKIE
@@ -210,5 +325,26 @@ public class AuthServiceImpl implements AuthService {
                 "Login successful",
                 new AuthResponse(accessToken, userResponse)
         );
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<Object> logout(HttpServletRequest request, HttpServletResponse response) {
+
+        String refreshTokenValue = cookieUtil.getCookieValue(request, "refreshToken");
+
+        if (refreshTokenValue != null) {
+            refreshTokenRepository.findByToken(refreshTokenValue)
+                    .ifPresent(refreshTokenRepository::delete);
+        }
+
+        cookieUtil.clearAuthCookie(response, "accessToken");
+        cookieUtil.clearAuthCookie(response, "refreshToken");
+
+        return new ApiResponse<>(
+                200,
+                true,
+                "User logout successfully."
+                );
     }
 }

@@ -1,6 +1,7 @@
 package com.studentlife.StudentLifeAPIs.Controller;
 
 import com.studentlife.StudentLifeAPIs.DTO.Request.UpdateUserRolesRequest;
+import com.studentlife.StudentLifeAPIs.DTO.Request.UserCreateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.UserUpdateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.PaginatedResponse;
@@ -36,6 +37,21 @@ public class UserController {
         );
     }
 
+    @PostMapping
+    @PreAuthorize("hasRole('admin")
+    public ResponseEntity<ApiResponse<UserResponse>> createdUser(
+            @RequestBody UserCreateRequest request
+            ) {
+        UserResponse created = userService.createUser(request);
+
+        return ResponseEntity.ok((new ApiResponse<>(
+                HttpStatus.CREATED.value(),
+                true,
+                "User created successfully.",
+                created
+        )));
+    }
+
     // ─── GET /api/v1/users/{id} ──────────────────────────────────────────────
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('admin')")
@@ -50,8 +66,8 @@ public class UserController {
         ));
     }
 
-    // ─── PATCH /api/v1/users/{id} ────────────────────────────────────────────
-    @PatchMapping("/{id}")
+    // ─── PUT /api/v1/users/{id} ────────────────────────────────────────────
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('admin') or @userSecurity.isSelf(#id)")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @PathVariable Long id,
@@ -67,25 +83,8 @@ public class UserController {
         ));
     }
 
-    // ─── PATCH /api/v1/users/{id}/roles ─────────────────────────────────────
-    @PatchMapping("/{id}/roles")
-    @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<ApiResponse<UserResponse>> updateUserRoles(
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateUserRolesRequest request
-    ) {
-        UserResponse updated = userService.updateUserRoles(id, request);
-
-        return ResponseEntity.ok(new ApiResponse<>(
-                HttpStatus.OK.value(),
-                true,
-                "User roles updated successfully.",
-                updated
-        ));
-    }
-
-    // ─── PATCH /api/v1/users/{id}/disable ───────────────────────────────────
-    @PatchMapping("/{id}/disable")
+    // ─── PUT /api/v1/users/{id}/disable ───────────────────────────────────
+    @PutMapping("/{id}/disable")
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<ApiResponse<Void>> disableUser(@PathVariable Long id) {
         userService.disableUser(id);
