@@ -6,7 +6,5 @@ import com.studentlife.StudentLifeAPIs.DTO.Response.PaginatedResponse;
 
 public interface ScheduleService {
 
-    PaginatedResponse<ApiResponse<?>> getAllByUser(int page, int size);
-
     ApiResponse<?> createSchedule(ScheduleCreateRequest request);
 }
