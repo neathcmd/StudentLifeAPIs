@@ -12,8 +12,4 @@ import java.util.List;
 public interface ScheduleRepository extends JpaRepository<Schedules, Long> {
 
     boolean existsByTitleAndUser(String title, Users user);
-
-    List<Schedules> findByUserId(Long userId);
-
-    Page<Schedules> findByUserIdOrderbydayOfWeek(Long userId, )
 }
