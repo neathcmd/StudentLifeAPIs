@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
                                 .requestMatchers("/api/v1/schedule/**").hasRole("student")
+                                .requestMatchers("/api/v1/admin/**").hasRole("admin")
 
 //                                .anyRequest().permitAll()
                         .anyRequest().authenticated()
