@@ -1,12 +1,12 @@
 package com.studentlife.StudentLifeAPIs.Controller;
 
-import com.studentlife.StudentLifeAPIs.DTO.Request.ScheduleCreateRequest;
+import com.studentlife.StudentLifeAPIs.DTO.Request.OneTimeScheduleRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.ScheduleFilter;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
-import com.studentlife.StudentLifeAPIs.DTO.Response.PaginatedResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ScheduleResponse;
 import com.studentlife.StudentLifeAPIs.Service.ScheduleService;
 import com.studentlife.StudentLifeAPIs.Utils.AuthUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,8 +45,10 @@ public class ScheduleController {
         return ResponseEntity.ok(scheduleService.getById(scheduleId));
     }
 
-    @PostMapping("/schedule")
-    public ResponseEntity<ApiResponse<?>> createdSchedule( @RequestBody ScheduleCreateRequest request) {
-        return ResponseEntity.status(201).body(scheduleService.createSchedule(request));
+    @PostMapping("/schedule/one-time")
+    public ResponseEntity<ApiResponse<?>> createOneTime(
+            @RequestBody @Valid OneTimeScheduleRequest request
+            ) {
+        return ResponseEntity.status(201).body(scheduleService.createOneTime(request));
     }
 }

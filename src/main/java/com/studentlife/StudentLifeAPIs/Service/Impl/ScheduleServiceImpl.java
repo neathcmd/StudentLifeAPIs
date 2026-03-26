@@ -1,7 +1,6 @@
 package com.studentlife.StudentLifeAPIs.Service.Impl;
 
-import com.studentlife.StudentLifeAPIs.DTO.Request.ScheduleCreateRequest;
-import com.studentlife.StudentLifeAPIs.DTO.Request.ScheduleFilter;
+import com.studentlife.StudentLifeAPIs.DTO.Request.*;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.PaginatedResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ScheduleResponse;
@@ -92,29 +91,33 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public ApiResponse<?> createSchedule(ScheduleCreateRequest request) {
+    public ApiResponse<ScheduleResponse> createOneTime(OneTimeScheduleRequest request) {
 
         if (request.getStartTime().isAfter(request.getEndTime())) {
-            throw validation("Start time must be before end time.");
+            throw validation("Start time must be before end time");
         }
 
-        Long userId = authUtil.getAuthenticatedUser().getId();
+        Users user = authUtil.getAuthenticatedUser();
 
-        Users user = userRepository.findById(userId)
-                .orElseThrow(() -> notFound("User not found."));
-
-        Schedules schedule = scheduleMapper.toScheduleEntityCreate(request);
+        Schedules schedule = scheduleMapper.toEntityFromOneTime(request);
         schedule.setUser(user);
-
         scheduleRepository.save(schedule);
-
-        ScheduleResponse scheduleResponse = scheduleMapper.toResponse(schedule);
 
         return new ApiResponse<>(
                 201,
                 true,
-                "Create Schedule successfully.",
-                scheduleResponse
+                "Create schedule successfully.",
+                scheduleMapper.toResponse(schedule)
         );
+    }
+
+    @Override
+    public ApiResponse<ScheduleResponse> createRecurring(RecurringScheduleRequest request) {
+        return null;
+    }
+
+    @Override
+    public ApiResponse<ScheduleResponse> updateSchedule(Long scheduleId, ScheduleUpdateRequest request) {
+        return null;
     }
 }
