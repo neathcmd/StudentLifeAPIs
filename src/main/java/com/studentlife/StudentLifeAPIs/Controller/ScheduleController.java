@@ -1,6 +1,7 @@
 package com.studentlife.StudentLifeAPIs.Controller;
 
 import com.studentlife.StudentLifeAPIs.DTO.Request.OneTimeScheduleRequest;
+import com.studentlife.StudentLifeAPIs.DTO.Request.RecurringScheduleRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.ScheduleFilter;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ScheduleResponse;
@@ -50,5 +51,12 @@ public class ScheduleController {
             @RequestBody @Valid OneTimeScheduleRequest request
             ) {
         return ResponseEntity.status(201).body(scheduleService.createOneTime(request));
+    }
+
+    @PostMapping("/schedule/recurring")
+    public ResponseEntity<ApiResponse<ScheduleResponse>> createRecurring(
+            @RequestBody @Valid RecurringScheduleRequest request
+            ) {
+        return ResponseEntity.status(201).body(scheduleService.createRecurring(request));
     }
 }

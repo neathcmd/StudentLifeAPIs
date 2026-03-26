@@ -113,7 +113,23 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public ApiResponse<ScheduleResponse> createRecurring(RecurringScheduleRequest request) {
-        return null;
+
+        if (request.getStartTime().isAfter(request.getEndTime())) {
+            throw validation("Start time must be before end time.");
+        }
+
+        Users user = authUtil.getAuthenticatedUser();
+
+        Schedules schedule = scheduleMapper.toEntityFromRecurring(request);
+        schedule.setUser(user);
+        scheduleRepository.save(schedule);
+
+        return new ApiResponse<>(
+                201,
+                true,
+                "Create schedule successfully.",
+                scheduleMapper.toResponse(schedule)
+        );
     }
 
     @Override
