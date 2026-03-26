@@ -2,13 +2,14 @@ package com.studentlife.StudentLifeAPIs.Service.Impl;
 
 import com.studentlife.StudentLifeAPIs.DTO.Request.UserCreateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.UserUpdateRequest;
+import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.PaginatedResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.UserResponse;
 import com.studentlife.StudentLifeAPIs.Entity.Users;
 import com.studentlife.StudentLifeAPIs.Mapper.UserMapper;
-import com.studentlife.StudentLifeAPIs.Repository.RoleRepository;
 import com.studentlife.StudentLifeAPIs.Repository.UserRepository;
 import com.studentlife.StudentLifeAPIs.Service.UserService;
+import com.studentlife.StudentLifeAPIs.Utils.AuthUtil;
 import com.studentlife.StudentLifeAPIs.Utils.UserValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final UserValidatorUtil userValidatorUtil;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final AuthUtil authUtil;
 
     // ─── Read ────────────────────────────────────────────────────────────────
 
@@ -86,9 +88,25 @@ public class UserServiceImpl implements UserService {
         if (request.getPhone() != null)         user.setPhone(request.getPhone());
         if (request.getUniversity() != null)    user.setUniversity(request.getUniversity());
         if (request.getMajor() != null)         user.setMajor(request.getMajor());
-        if (request.getAcademic_year() != null) user.setAcademicYear(request.getAcademic_year());
+        if (request.getAcademic_year() != null) return null;user.setAcademicYear(request.getAcademic_year());
 
         return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    @Override
+    public ApiResponse<UserResponse> GetProfileInfo() {
+
+        Users authUser = authUtil.getAuthenticatedUser();
+
+        Users currentUserData = userRepository.findById(authUser.getId())
+                .orElseThrow(() -> notFound("User not found."));
+
+        return new ApiResponse<>(
+                200,
+                true,
+                "Get auth user successfully.",
+                userMapper.toUserResponse(currentUserData)
+        );
     }
 
     // ─── Disable / Delete ────────────────────────────────────────────────────

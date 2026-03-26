@@ -3,6 +3,7 @@ package com.studentlife.StudentLifeAPIs.Service;
 
 import com.studentlife.StudentLifeAPIs.DTO.Request.UserCreateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.UserUpdateRequest;
+import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.PaginatedResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.UserResponse;
 
@@ -15,6 +16,8 @@ public interface UserService {
     UserResponse createUser(UserCreateRequest request);
 
     UserResponse updateUser(Long id, UserUpdateRequest request);
+
+    ApiResponse<UserResponse> GetProfileInfo();
 
     void disableUser(Long id);
 
