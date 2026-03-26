@@ -1,30 +1,26 @@
-package com.studentlife.StudentLifeAPIs.DTO.Response;
+package com.studentlife.StudentLifeAPIs.DTO.Request;
 
-import com.studentlife.StudentLifeAPIs.Enum.ScheduleType;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Data
-public class ScheduleResponse {
-
-    private Long id;
+@NoArgsConstructor
+public class ScheduleUpdateRequest {
     private String title;
     private String description;
-    private ScheduleType type;
 
-    // One-time
+    // One-time fields
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-
-    // Recurring
-    private int dayOfWeek;
+    // Recurring fields
+    private Integer dayOfWeek;
     private LocalTime recurringStartTime;
     private LocalTime recurringEndTime;
 
     private String location;
-    private UserSummaryResponse createdBy;
 }

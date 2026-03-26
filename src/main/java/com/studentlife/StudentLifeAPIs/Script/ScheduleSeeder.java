@@ -13,8 +13,11 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Set;
+
+import static com.studentlife.StudentLifeAPIs.Enum.ScheduleType.ONE_TIME;
 
 @Slf4j
 @Component
@@ -73,9 +76,10 @@ public class ScheduleSeeder implements CommandLineRunner {
                 Schedules.builder()
                         .title(title)
                         .description(description)
+                        .type(ONE_TIME)
                         .dayOfWeek(dayOfWeek)
-                        .startTime(Instant.parse("2025-01-06T" + startTime + ":00Z"))
-                        .endTime(Instant.parse("2025-01-06T" + endTime + ":00Z"))
+                        .startTime(OffsetDateTime.parse("2025-01-06T" + startTime + ":00Z").toLocalDateTime())
+                        .endTime(OffsetDateTime.parse("2025-01-06T" + endTime + ":00Z").toLocalDateTime())
                         .location(location)
                         .user(user)
                         .build()

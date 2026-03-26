@@ -1,5 +1,6 @@
 package com.studentlife.StudentLifeAPIs.Entity;
 
+import com.studentlife.StudentLifeAPIs.Enum.ScheduleType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -13,6 +14,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "schedules")
@@ -32,17 +35,28 @@ public class Schedules {
 
     private String description;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ScheduleType type;
+
+    // ── One-time fields ──────────────────────────
+    @Column(name = "start_time")
+    private LocalDateTime startTime;      // e.g. 2026-03-28T14:00
+
+    @Column(name = "end_time")
+    private LocalDateTime endTime;        // e.g. 2026-03-28T16:00
+
+    // ── Recurring fields ─────────────────────────
     @Min(1) @Max(7)
-    @Column(name = "day_of_week", nullable = false)
-    private int dayOfWeek;
+    @Column(name = "day_of_week")
+    private Integer dayOfWeek;            // nullable — only used when RECURRING
 
-    @NotNull
-    @Column(name = "start_time", nullable = false)
-    private Instant startTime;
+    @Column(name = "recurring_start_time")
+    private LocalTime recurringStartTime; // e.g. 14:00
 
-    @NotNull
-    @Column(name = "end_time", nullable = false)
-    private Instant endTime;
+    @Column(name = "recurring_end_time")
+    private LocalTime recurringEndTime;
 
     private String location;
 
