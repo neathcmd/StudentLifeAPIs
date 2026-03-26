@@ -6,22 +6,25 @@ import com.studentlife.StudentLifeAPIs.DTO.Request.ScheduleFilter;
 import com.studentlife.StudentLifeAPIs.DTO.Request.ScheduleUpdateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.PaginatedResponse;
-import com.studentlife.StudentLifeAPIs.DTO.Response.ScheduleResponse;
+import com.studentlife.StudentLifeAPIs.DTO.Response.RecurringScheduleResponse;
+import com.studentlife.StudentLifeAPIs.DTO.Response.OneTimeScheduleResponse;
 
 public interface ScheduleService {
 
-    ApiResponse<PaginatedResponse<ScheduleResponse>> getByUserId(
+    ApiResponse<PaginatedResponse<OneTimeScheduleResponse>> getByUserId(
             Long userId,
             int page,
             int size,
             ScheduleFilter filter
     );
 
-    ApiResponse<ScheduleResponse> getById(Long scheduleId);
+    ApiResponse<OneTimeScheduleResponse> getById(Long scheduleId);
 
-    ApiResponse<ScheduleResponse> createOneTime(OneTimeScheduleRequest request);
+    ApiResponse<OneTimeScheduleResponse> createOneTime(OneTimeScheduleRequest request);
 
-    ApiResponse<ScheduleResponse> createRecurring(RecurringScheduleRequest request);
+    ApiResponse<RecurringScheduleResponse> createRecurring(RecurringScheduleRequest request);
 
-    ApiResponse<ScheduleResponse> updateSchedule(Long scheduleId, ScheduleUpdateRequest request);
+    ApiResponse<OneTimeScheduleResponse> updateSchedule(Long scheduleId, ScheduleUpdateRequest request);
+
+    ApiResponse<?> deleteSchedule(Long scheduleId, Long userId);
 }

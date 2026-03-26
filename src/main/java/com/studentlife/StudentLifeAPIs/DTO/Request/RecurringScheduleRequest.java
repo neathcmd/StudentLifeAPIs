@@ -14,15 +14,20 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecurringScheduleRequest {
+
     @NotBlank
     private String title;
     private String description;
+
     @NotNull
     @Min(1) @Max(7)
     private Integer dayOfWeek;
+
     @NotNull
-    private LocalTime startTime;
+    private LocalTime recurringStartTime;  // renamed from startTime
+
     @NotNull
-    private LocalTime endTime;
+    private LocalTime recurringEndTime;    // renamed from endTime
+
     private String location;
 }

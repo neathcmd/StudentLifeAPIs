@@ -3,7 +3,8 @@ package com.studentlife.StudentLifeAPIs.Service.Impl;
 import com.studentlife.StudentLifeAPIs.DTO.Request.*;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.PaginatedResponse;
-import com.studentlife.StudentLifeAPIs.DTO.Response.ScheduleResponse;
+import com.studentlife.StudentLifeAPIs.DTO.Response.RecurringScheduleResponse;
+import com.studentlife.StudentLifeAPIs.DTO.Response.OneTimeScheduleResponse;
 import com.studentlife.StudentLifeAPIs.Entity.Schedules;
 import com.studentlife.StudentLifeAPIs.Entity.Users;
 import com.studentlife.StudentLifeAPIs.Enum.ScheduleType;
@@ -18,16 +19,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.notFound;
-import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.validation;
+import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.*;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +37,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleMapper scheduleMapper;
 
     @Override
-    public ApiResponse<PaginatedResponse<ScheduleResponse>> getByUserId(
+    public ApiResponse<PaginatedResponse<OneTimeScheduleResponse>> getByUserId(
             Long userId,
             int page,
             int size,
@@ -54,7 +52,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             throw notFound("No schedule data found for this user.");
         }
 
-        List<ScheduleResponse> responses = schedulePage.getContent()
+        List<OneTimeScheduleResponse> responses = schedulePage.getContent()
                 .stream()
                 .map(scheduleMapper::toResponse)
                 .toList();
@@ -69,7 +67,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                         schedulePage.hasPrevious()
                 );
 
-        PaginatedResponse<ScheduleResponse> paginatedResponse =
+        PaginatedResponse<OneTimeScheduleResponse> paginatedResponse =
                 new PaginatedResponse<>(responses, meta);
 
         return new ApiResponse<>(
@@ -80,7 +78,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public ApiResponse<ScheduleResponse> getById(Long scheduleId) {
+    public ApiResponse<OneTimeScheduleResponse> getById(Long scheduleId) {
 
         Schedules schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> notFound("Schedule data not found."));
@@ -94,7 +92,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public ApiResponse<ScheduleResponse> createOneTime(OneTimeScheduleRequest request) {
+    public ApiResponse<OneTimeScheduleResponse> createOneTime(OneTimeScheduleRequest request) {
 
         if (request.getStartTime().isAfter(request.getEndTime())) {
             throw validation("Start time must be before end time");
@@ -115,9 +113,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public ApiResponse<ScheduleResponse> createRecurring(RecurringScheduleRequest request) {
+    public ApiResponse<RecurringScheduleResponse> createRecurring(RecurringScheduleRequest request) {
 
-        if (request.getStartTime().isAfter(request.getEndTime())) {
+        if (request.getRecurringStartTime().isAfter(request.getRecurringEndTime())) {
             throw validation("Start time must be before end time.");
         }
 
@@ -131,12 +129,12 @@ public class ScheduleServiceImpl implements ScheduleService {
                 201,
                 true,
                 "Create schedule successfully.",
-                scheduleMapper.toResponse(schedule)
+                scheduleMapper.toRecurringResponse(schedule)
         );
     }
 
     @Override
-    public ApiResponse<ScheduleResponse> updateSchedule(Long scheduleId, ScheduleUpdateRequest request) {
+    public ApiResponse<OneTimeScheduleResponse> updateSchedule(Long scheduleId, ScheduleUpdateRequest request) {
 
         Schedules schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> notFound("Schedule not found."));
@@ -182,6 +180,25 @@ public class ScheduleServiceImpl implements ScheduleService {
                 true,
                 "Update schedule successfully.",
                 scheduleMapper.toResponse(schedule)
+        );
+    }
+
+    @Override
+    public ApiResponse<?> deleteSchedule(Long scheduleId, Long userId) {
+
+        Schedules schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> notFound("Schedule not found."));
+
+        if (!schedule.getUser().getId().equals(userId)) {
+           throw forbidden("You are not allowed to perform this action.");
+        }
+
+        scheduleRepository.delete(schedule);
+
+        return new ApiResponse<>(
+                200,
+                true,
+                "Delete schedule successfully."
         );
     }
 }
