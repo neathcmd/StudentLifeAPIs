@@ -3,22 +3,15 @@ package com.studentlife.StudentLifeAPIs.DTO.Response;
 import com.studentlife.StudentLifeAPIs.Enum.ScheduleType;
 import lombok.Data;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Data
-public class ScheduleResponse {
-
+public class RecurringScheduleResponse {
     private Long id;
     private String title;
     private String description;
     private ScheduleType type;
-
-    // One-time
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-
 
     // Recurring
     private int dayOfWeek;

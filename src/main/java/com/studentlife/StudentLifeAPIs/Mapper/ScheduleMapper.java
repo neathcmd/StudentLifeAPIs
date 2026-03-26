@@ -2,7 +2,8 @@ package com.studentlife.StudentLifeAPIs.Mapper;
 
 import com.studentlife.StudentLifeAPIs.DTO.Request.OneTimeScheduleRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.RecurringScheduleRequest;
-import com.studentlife.StudentLifeAPIs.DTO.Response.ScheduleResponse;
+import com.studentlife.StudentLifeAPIs.DTO.Response.RecurringScheduleResponse;
+import com.studentlife.StudentLifeAPIs.DTO.Response.OneTimeScheduleResponse;
 import com.studentlife.StudentLifeAPIs.Entity.Schedules;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -31,5 +32,9 @@ public interface ScheduleMapper {
 
     @Mapping(source = "user.id", target = "createdBy.id")
     @Mapping(source = "user.username", target = "createdBy.username")
-    ScheduleResponse toResponse(Schedules schedule);
+    OneTimeScheduleResponse toResponse(Schedules schedule);
+
+    @Mapping(source = "user.id", target = "createdBy.id")
+    @Mapping(source = "user.username", target = "createdBy.username")
+    RecurringScheduleResponse toRecurringResponse(Schedules schedule);
 }
