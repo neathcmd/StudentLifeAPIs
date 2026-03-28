@@ -1,12 +1,19 @@
 package com.studentlife.StudentLifeAPIs.Utils;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
+
+import java.time.Duration;
 
 @Component
 public class CookieUtil {
+
+    @Value("${app.secure-cookie:false}") // false for local, true for production
+    private boolean secureCookie;
 
     public void setAuthCookie(
             HttpServletResponse response,
@@ -14,23 +21,27 @@ public class CookieUtil {
             String value,
             int maxAge
     ) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(maxAge);
+        ResponseCookie cookie = ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .secure(secureCookie)
+                .path("/")
+                .maxAge(Duration.ofSeconds(maxAge))
+                .sameSite(secureCookie ? "None" : "Lax")
+                .build();
 
-        response.addCookie(cookie);
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     public void clearAuthCookie(HttpServletResponse response, String name) {
-        Cookie cookie = new Cookie(name, null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
+        ResponseCookie cookie = ResponseCookie.from(name, "")
+                .httpOnly(true)
+                .secure(secureCookie)
+                .path("/")
+                .maxAge(Duration.ZERO)
+                .sameSite(secureCookie ? "None" : "Lax")
+                .build();
 
-        response.addCookie(cookie);
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     public String getCookieValue(HttpServletRequest request, String name) {

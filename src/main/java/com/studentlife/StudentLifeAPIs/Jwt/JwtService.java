@@ -145,13 +145,13 @@ public class JwtService {
      * VALIDATION
      * =========================
      */
-    private boolean isTokenExpired(String token) {
-        return !extractExpiration(token).before(new Date());
+    private boolean isTokenNotExpired(String token) {
+        return extractExpiration(token).after(new Date());
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         return extractUsername(token).equals(userDetails.getUsername())
-                && isTokenExpired(token);
+                && isTokenNotExpired(token); // no ! needed, warning gone
     }
 
     public boolean validateToken(String token) {
@@ -161,8 +161,8 @@ public class JwtService {
         }
 
         try {
-            extractAllClaims(token); // verifies signature + structure
-            return isTokenExpired(token);
+            extractAllClaims(token);
+            return isTokenNotExpired(token); // no ! needed, warning gone
         } catch (JwtException | IllegalArgumentException e) {
             logger.debug("Token validation failed: {}", e.getMessage());
             return false;

@@ -1,5 +1,6 @@
 package com.studentlife.StudentLifeAPIs.Jwt;
 
+import com.studentlife.StudentLifeAPIs.Utils.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +23,8 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService; // inject your UserDetailsServiceImpl
+    private final UserDetailsService userDetailsService;
+    private final CookieUtil cookieUtil;
 
     @Override
     protected void doFilterInternal(
@@ -32,12 +34,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         // Extract token from header
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String token = cookieUtil.getCookieValue(request, "accessToken");
+
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
-        String token = authHeader.substring(7);
 
         // Extract username from token
         String username = jwtService.extractUsername(token);
