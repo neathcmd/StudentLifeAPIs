@@ -78,6 +78,7 @@ public class SecurityConfig {
 
         // allow all origin to access this server
         config.addAllowedOriginPattern("*");
+        config.setAllowCredentials(true);
 
 //        config.setAllowedOrigins(List.of(
 //                "http://localhost:3000",
