@@ -1,6 +1,6 @@
 package com.studentlife.StudentLifeAPIs.Enum;
 
 public enum ScheduleType {
-    ONE_TIME,
-    RECURRING
+
+    ONE_TIME, RECURRING
 }

@@ -2,71 +2,91 @@ package com.studentlife.StudentLifeAPIs.Controller;
 
 import com.studentlife.StudentLifeAPIs.DTO.Request.OneTimeScheduleRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.RecurringScheduleRequest;
-import com.studentlife.StudentLifeAPIs.DTO.Request.ScheduleFilter;
 import com.studentlife.StudentLifeAPIs.DTO.Request.ScheduleUpdateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
-import com.studentlife.StudentLifeAPIs.DTO.Response.OneTimeScheduleResponse;
 import com.studentlife.StudentLifeAPIs.Service.ScheduleService;
-import com.studentlife.StudentLifeAPIs.Utils.AuthUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/schedule")
 @RequiredArgsConstructor
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
-    private final AuthUtil authUtil;
 
-    @GetMapping("/schedule/my-schedule")
-    public ResponseEntity<ApiResponse<?>> getSchedulesByUserId(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @ModelAttribute ScheduleFilter filter
+//    /**
+//     * GET /api/v1/schedule/my-schedule
+//     * GET /api/v1/schedule/my-schedule?startDate=2026-03-24&endDate=2026-03-30   ← weekly
+//     * GET /api/v1/schedule/my-schedule?startDate=2026-03-30&endDate=2026-03-30   ← daily
+//     * GET /api/v1/schedule/my-schedule?startDate=2026-03-01&endDate=2026-03-31   ← monthly
+//     *
+//     * No date params → returns ALL schedules for the user (recurring + all one-time)
+//     * With date params → returns RECURRING (always) + ONE_TIME that fall in that range
+//     */
+    @GetMapping("/my-schedule")
+    public ResponseEntity<ApiResponse<?>> getMySchedules(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
-        Long userId = authUtil.getAuthenticatedUser().getId();
-        return ResponseEntity.ok(scheduleService.getByUserId(userId, page, size, filter));
+        return ResponseEntity.ok(scheduleService.getMySchedules(startDate, endDate));
     }
 
-//        **Example API calls:**
-//    GET /schedule/my-schedule?page=0&size=10
-//    GET /schedule/my-schedule?page=0&size=10&title=math
-//    GET /schedule/my-schedule?page=0&size=10&startDate=2025-01-01&endDate=2025-06-30
-//    GET /schedule/my-schedule?page=0&size=10&title=bio&startDate=2025-03-01
-
-    @GetMapping("/schedule/{scheduleId}")
-    public ResponseEntity<ApiResponse<OneTimeScheduleResponse>> getById(
-            @PathVariable Long scheduleId
-    ) {
+//    /**
+//     * GET /api/v1/schedule/{scheduleId}
+//     * Returns a single schedule. Only the owner can access it.
+//     */
+    @GetMapping("/{scheduleId}")
+    public ResponseEntity<ApiResponse<?>> getById(@PathVariable Long scheduleId) {
         return ResponseEntity.ok(scheduleService.getById(scheduleId));
     }
-    @PostMapping("/schedule/one-time")
+
+//    /**
+//     * POST /api/v1/schedule/one-time
+//     * Body: { title, description, startTime, endTime, location, isImportant }
+//     */
+    @PostMapping("/one-time")
     public ResponseEntity<ApiResponse<?>> createOneTime(
-            @RequestBody @Valid OneTimeScheduleRequest request) {
+            @RequestBody @Valid OneTimeScheduleRequest request
+    ) {
         return ResponseEntity.status(201).body(scheduleService.createOneTime(request));
     }
 
-    @PostMapping("/schedule/recurring")
+//    /**
+//     * POST /api/v1/schedule/recurring
+//     * Body: { title, description, dayOfWeek (0-6), recurringStartTime, recurringEndTime, location, isImportant }
+//     */
+    @PostMapping("/recurring")
     public ResponseEntity<ApiResponse<?>> createRecurring(
-            @RequestBody @Valid RecurringScheduleRequest request) {
+            @RequestBody @Valid RecurringScheduleRequest request
+    ) {
         return ResponseEntity.status(201).body(scheduleService.createRecurring(request));
     }
 
-    @PutMapping("/schedule/{scheduleId}")
+//    /**
+//     * PUT /api/v1/schedule/{scheduleId}
+//     * All fields optional — only non-null fields are updated.
+//     * Only the owner can update.
+//     */
+    @PutMapping("/{scheduleId}")
     public ResponseEntity<ApiResponse<?>> updateSchedule(
             @PathVariable Long scheduleId,
-            @RequestBody ScheduleUpdateRequest request) {
+            @RequestBody @Valid ScheduleUpdateRequest request
+    ) {
         return ResponseEntity.ok(scheduleService.updateSchedule(scheduleId, request));
     }
 
-    @DeleteMapping("/schedule/{scheduleId}")
-    public ResponseEntity<ApiResponse<?>> deleteSchedule(
-            @PathVariable Long scheduleId
-    ) {
-        Long userId = authUtil.getAuthenticatedUser().getId();
-        return ResponseEntity.ok(scheduleService.deleteSchedule(scheduleId, userId));
+//    /**
+//     * DELETE /api/v1/schedule/{scheduleId}
+//     * Only the owner can delete.
+//     */
+    @DeleteMapping("/{scheduleId}")
+    public ResponseEntity<ApiResponse<?>> deleteSchedule(@PathVariable Long scheduleId) {
+        return ResponseEntity.ok(scheduleService.deleteSchedule(scheduleId));
     }
 }

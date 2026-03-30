@@ -4,30 +4,28 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class RecurringScheduleRequest {
-
-    @NotBlank
+    @NotBlank(message = "Title is required")
     private String title;
+
     private String description;
 
-    @NotNull
-    @Min(1) @Max(7)
-    private Integer dayOfWeek;
+    @NotNull(message = "Day of week is required")
+    @Min(value = 0, message = "Day of week must be between 0 (Sun) and 6 (Sat)")
+    @Max(value = 6, message = "Day of week must be between 0 (Sun) and 6 (Sat)")
+    private Integer dayOfWeek;  // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
 
-    @NotNull
-    private LocalTime recurringStartTime;  // renamed from startTime
+    @NotNull(message = "Start time is required")
+    private LocalTime recurringStartTime;
 
-    @NotNull
-    private LocalTime recurringEndTime;    // renamed from endTime
+    @NotNull(message = "End time is required")
+    private LocalTime recurringEndTime;
 
     private String location;
+    private boolean isImportant;
 }

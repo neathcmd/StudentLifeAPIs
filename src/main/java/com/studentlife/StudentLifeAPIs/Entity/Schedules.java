@@ -40,25 +40,35 @@ public class Schedules {
     @Column(nullable = false)
     private ScheduleType type;
 
-    // ── One-time fields ──────────────────────────
+    // ── One-time fields ───────────────────────────────────────────────────────
+
     @Column(name = "start_time")
-    private LocalDateTime startTime;      // e.g. 2026-03-28T14:00
+    private LocalDateTime startTime;
 
     @Column(name = "end_time")
-    private LocalDateTime endTime;        // e.g. 2026-03-28T16:00
+    private LocalDateTime endTime;
 
-    // ── Recurring fields ─────────────────────────
-    @Min(1) @Max(7)
+    // ── Recurring fields ──────────────────────────────────────────────────────
+
+    // Fixed: was @Min(1) @Max(7) which doesn't match JS (0=Sun..6=Sat)
+    // Now: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+    @Min(0) @Max(6)
     @Column(name = "day_of_week")
-    private Integer dayOfWeek;            // nullable — only used when RECURRING
+    private Integer dayOfWeek;
 
     @Column(name = "recurring_start_time")
-    private LocalTime recurringStartTime; // e.g. 14:00
+    private LocalTime recurringStartTime;
 
     @Column(name = "recurring_end_time")
     private LocalTime recurringEndTime;
 
+    // ── Common fields ─────────────────────────────────────────────────────────
+
     private String location;
+
+    // Added: lets students mark high-priority events with a star
+    @Column(name = "is_important", nullable = false)
+    private boolean isImportant = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -71,5 +81,4 @@ public class Schedules {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
-
 }

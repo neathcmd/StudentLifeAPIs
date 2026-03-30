@@ -3,6 +3,7 @@ package com.studentlife.StudentLifeAPIs.Script;
 import com.studentlife.StudentLifeAPIs.Entity.Roles;
 import com.studentlife.StudentLifeAPIs.Entity.Schedules;
 import com.studentlife.StudentLifeAPIs.Entity.Users;
+import com.studentlife.StudentLifeAPIs.Enum.ScheduleType;
 import com.studentlife.StudentLifeAPIs.Repository.RoleRepository;
 import com.studentlife.StudentLifeAPIs.Repository.ScheduleRepository;
 import com.studentlife.StudentLifeAPIs.Repository.UserRepository;
@@ -13,11 +14,10 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.time.LocalTime;
 import java.util.Set;
-
-import static com.studentlife.StudentLifeAPIs.Enum.ScheduleType.ONE_TIME;
 
 @Slf4j
 @Component
@@ -31,18 +31,81 @@ public class ScheduleSeeder implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public void run(String... args) throws Exception {
-        log.info("Seeding...");
+    public void run(String... args) {
+        log.info("Seeding schedules...");
 
         Users student = seedStudent();
-        seedSchedule("Math 101",       "Calculus lecture",      1, "08:00", "09:30", "Room A1",  student);
-        seedSchedule("Physics Lab",    "Weekly lab session",    2, "10:00", "12:00", "Lab B2",   student);
-        seedSchedule("English 201",    "Writing and grammar",   3, "13:00", "14:30", "Room C3",  student);
-        seedSchedule("CS Algorithms",  "Data structures class", 4, "09:00", "10:30", "Room D4",  student);
-        seedSchedule("History",        "Modern history",        5, "14:00", "15:30", "Room E5",  student);
 
-        log.info("Seed completed.");
+        // ── RECURRING schedules (weekly classes) ──────────────────────────────
+        // dayOfWeek: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+        seedRecurring("Math 101",      "Calculus lecture",       1, "08:00", "09:30", "Room A1", false, student);
+        seedRecurring("Physics Lab",   "Weekly lab session",     2, "10:00", "12:00", "Lab B2",  false, student);
+        seedRecurring("English 201",   "Writing and grammar",    3, "13:00", "14:30", "Room C3", false, student);
+        seedRecurring("CS Algorithms", "Data structures class",  4, "09:00", "10:30", "Room D4", false, student);
+        seedRecurring("History",       "Modern history",         5, "14:00", "15:30", "Room E5", false, student);
+
+        // ── ONE_TIME schedules (specific dated events) ────────────────────────
+        seedOneTime("Midterm Exam",    "Math midterm exam",      "2026-04-10", "09:00", "11:00", "Hall A",    true,  student);
+        seedOneTime("Group Study",     "Study session for CS",   "2026-04-05", "14:00", "17:00", "Library",   false, student);
+        seedOneTime("Advisor Meeting", "Semester course review", "2026-04-03", "11:00", "11:30", "Office C1", true,  student);
+
+        log.info("Schedule seeding completed.");
     }
+
+    // ── Seed helpers ──────────────────────────────────────────────────────────
+
+    private void seedRecurring(String title, String description, int dayOfWeek,
+                               String startTime, String endTime, String location,
+                               boolean isImportant, Users user) {
+        if (scheduleRepository.existsByTitleAndUserId(title, user.getId())) {
+            log.info("Schedule '{}' already exists, skipping.", title);
+            return;
+        }
+
+        scheduleRepository.save(
+                Schedules.builder()
+                        .title(title)
+                        .description(description)
+                        .type(ScheduleType.RECURRING)
+                        .dayOfWeek(dayOfWeek)
+                        .recurringStartTime(LocalTime.parse(startTime))
+                        .recurringEndTime(LocalTime.parse(endTime))
+                        .location(location)
+                        .isImportant(isImportant)
+                        .user(user)
+                        .build()
+        );
+
+        log.info("Recurring schedule '{}' seeded.", title);
+    }
+
+    private void seedOneTime(String title, String description, String date,
+                             String startTime, String endTime, String location,
+                             boolean isImportant, Users user) {
+        if (scheduleRepository.existsByTitleAndUserId(title, user.getId())) {
+            log.info("Schedule '{}' already exists, skipping.", title);
+            return;
+        }
+
+        LocalDate localDate = LocalDate.parse(date);
+
+        scheduleRepository.save(
+                Schedules.builder()
+                        .title(title)
+                        .description(description)
+                        .type(ScheduleType.ONE_TIME)
+                        .startTime(LocalDateTime.of(localDate, LocalTime.parse(startTime)))
+                        .endTime(LocalDateTime.of(localDate, LocalTime.parse(endTime)))
+                        .location(location)
+                        .isImportant(isImportant)
+                        .user(user)
+                        .build()
+        );
+
+        log.info("One-time schedule '{}' seeded.", title);
+    }
+
+    // ── User helper ───────────────────────────────────────────────────────────
 
     private Users seedStudent() {
         return userRepository.findByUsername("student_demo").orElseGet(() -> {
@@ -63,28 +126,5 @@ public class ScheduleSeeder implements CommandLineRunner {
             log.info("Demo student created.");
             return userRepository.save(user);
         });
-    }
-
-    private void seedSchedule(String title, String description, int dayOfWeek,
-                              String startTime, String endTime, String location, Users user) {
-        if (scheduleRepository.existsByTitleAndUser(title, user)) {
-            log.info("Schedule '{}' already exists, skipping.", title);
-            return;
-        }
-
-        scheduleRepository.save(
-                Schedules.builder()
-                        .title(title)
-                        .description(description)
-                        .type(ONE_TIME)
-                        .dayOfWeek(dayOfWeek)
-                        .startTime(OffsetDateTime.parse("2025-01-06T" + startTime + ":00Z").toLocalDateTime())
-                        .endTime(OffsetDateTime.parse("2025-01-06T" + endTime + ":00Z").toLocalDateTime())
-                        .location(location)
-                        .user(user)
-                        .build()
-        );
-
-        log.info("Schedule '{}' seeded successfully.", title);
     }
 }
