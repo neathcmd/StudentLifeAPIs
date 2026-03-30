@@ -77,9 +77,6 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // allow all origin to access this server
-<<<<<<< Updated upstream
-        config.addAllowedOriginPattern("*");
-=======
 //        config.addAllowedOriginPattern("*");
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
@@ -87,7 +84,6 @@ public class SecurityConfig {
                 "https://studentlifeapis.onrender.com"
         ));
 
->>>>>>> Stashed changes
         config.setAllowCredentials(true);
 
 //        config.setAllowedOrigins(List.of(
