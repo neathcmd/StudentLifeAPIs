@@ -12,8 +12,8 @@ import java.time.Duration;
 @Component
 public class CookieUtil {
 
-    @Value("${app.secure-cookie:false}") // false for local, true for production
-    private boolean secureCookie;
+//    @Value("${app.secure-cookie:false}") // false for local, true for production
+//    private boolean secureCookie;
 
     public void setAuthCookie(
             HttpServletResponse response,
@@ -23,10 +23,12 @@ public class CookieUtil {
     ) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .httpOnly(true)
-                .secure(secureCookie)
+//                .secure(true)
+                .secure(false)
                 .path("/")
                 .maxAge(Duration.ofSeconds(maxAge))
-                .sameSite(secureCookie ? "None" : "Lax")
+//                .sameSite("None")
+                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
@@ -35,10 +37,12 @@ public class CookieUtil {
     public void clearAuthCookie(HttpServletResponse response, String name) {
         ResponseCookie cookie = ResponseCookie.from(name, "")
                 .httpOnly(true)
-                .secure(secureCookie)
+//                .secure(true)
+                .secure(false)
                 .path("/")
                 .maxAge(Duration.ZERO)
-                .sameSite(secureCookie ? "None" : "Lax")
+//                .sameSite("None")
+                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
