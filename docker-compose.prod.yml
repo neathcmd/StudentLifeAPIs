@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: studentLife_apis_prod
     restart: always
+        env_file:
+      - .env
     expose:
       - "5000"
     deploy:
