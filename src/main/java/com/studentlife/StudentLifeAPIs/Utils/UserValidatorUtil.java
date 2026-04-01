@@ -18,17 +18,16 @@ public class UserValidatorUtil {
     // =================
     // EMAIL FORMAT VALIDATOR
     // =================
-    public void validateEmailFormat(String email) {
-        if (email == null || !email.contains("@") || !email.endsWith(".com")) {
-            throw badRequest("Email must contain '@' and end with '.com'");
-        }
-    }
+//    public void validateEmailFormat(String email) {
+//        if (email == null || !email.contains("@") || !email.endsWith(".com")) {
+//            throw badRequest("Email must contain '@' and end with '.com'");
+//        }
+//    }
 
     // =================
     // CREATE VALIDATION
     // =================
     public void validateCreate(UserCreateRequest request) {
-        validateEmailFormat(request.getEmail());
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw badRequest("Email is already in use.");
@@ -64,7 +63,5 @@ public class UserValidatorUtil {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw badRequest("Email already exists");
         }
-
-        validateEmailFormat(request.getEmail());
     }
 }

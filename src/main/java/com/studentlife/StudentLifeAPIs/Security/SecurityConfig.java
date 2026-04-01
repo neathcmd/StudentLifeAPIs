@@ -47,6 +47,10 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
+                                .requestMatchers(
+                                        "/ws/**",          // ✅ Allow WebSocket handshake
+                                        "/ws/websocket/**" // ✅ Allow SockJS fallback
+                                ).permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
                                 .requestMatchers("/api/v1/me").authenticated()
@@ -80,7 +84,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000/",
                 "http://localhost:5173/",
-                "https://student-life-platform.vercel.app/"
+                "https://student-life-platform.vercel.app/",
+                "http://127.0.0.1:5500/"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
