@@ -7,4 +7,7 @@ services:
     restart: always
     expose:
       - "5000"
-    mem_limit: 1g
+    deploy:
+      resources:
+        limits:
+          memory: 1g
