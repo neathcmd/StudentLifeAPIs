@@ -19,7 +19,7 @@ public class UserResponse {
     private String phone;
     private String university;
     private String major;
-    private String academic_year;
+    private String academicYear;
     private Set<String> roles;
     private Instant createdAt;
     private Instant updatedAt;

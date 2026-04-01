@@ -88,10 +88,10 @@ public class ScheduleServiceImpl implements ScheduleService {
         schedule.setUser(currentUser);
         scheduleRepository.save(schedule);
 
-        NotificationRequest notifRequest = new NotificationRequest();
-        notifRequest.setTitle("Schedule Created");
-        notifRequest.setMessage("Your schedule \"" + schedule.getTitle() + "\" has been created.");
-        notificationService.sendNotification(notifRequest, NotificationType.SCHEDULE);
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setTitle("Schedule Created");
+        notificationRequest.setMessage("Your schedule \"" + schedule.getTitle() + "\" has been created.");
+        notificationService.sendNotification(notificationRequest, NotificationType.SCHEDULE);
 
         return new ApiResponse<>(
                 201,
@@ -115,10 +115,10 @@ public class ScheduleServiceImpl implements ScheduleService {
         schedule.setUser(currentUser);
         scheduleRepository.save(schedule);
 
-        NotificationRequest notifRequest = new NotificationRequest();
-        notifRequest.setTitle("Recurring Schedule Created");
-        notifRequest.setMessage("Your recurring schedule \"" + schedule.getTitle() + "\" has been created.");
-        notificationService.sendNotification(notifRequest, NotificationType.SCHEDULE);
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setTitle("Recurring Schedule Created");
+        notificationRequest.setMessage("Your recurring schedule \"" + schedule.getTitle() + "\" has been created.");
+        notificationService.sendNotification(notificationRequest, NotificationType.SCHEDULE);
 
         return new ApiResponse<>(
                 201,
