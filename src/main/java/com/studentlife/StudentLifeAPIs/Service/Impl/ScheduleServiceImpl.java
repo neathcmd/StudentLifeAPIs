@@ -1,5 +1,6 @@
 package com.studentlife.StudentLifeAPIs.Service.Impl;
 
+import com.studentlife.StudentLifeAPIs.DTO.Request.NotificationRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.OneTimeScheduleRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.RecurringScheduleRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.ScheduleUpdateRequest;
@@ -7,9 +8,11 @@ import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ScheduleResponse;
 import com.studentlife.StudentLifeAPIs.Entity.Schedules;
 import com.studentlife.StudentLifeAPIs.Entity.Users;
+import com.studentlife.StudentLifeAPIs.Enum.NotificationType;
 import com.studentlife.StudentLifeAPIs.Enum.ScheduleType;
 import com.studentlife.StudentLifeAPIs.Mapper.ScheduleMapper;
 import com.studentlife.StudentLifeAPIs.Repository.ScheduleRepository;
+import com.studentlife.StudentLifeAPIs.Service.NotificationService;
 import com.studentlife.StudentLifeAPIs.Service.ScheduleService;
 import com.studentlife.StudentLifeAPIs.Specification.ScheduleSpecification;
 import com.studentlife.StudentLifeAPIs.Utils.AuthUtil;
@@ -31,6 +34,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleMapper scheduleMapper;
     private final AuthUtil authUtil;
     private final ScheduleUtil scheduleUtil;
+    private final NotificationService notificationService;
 
     // ── Get all schedules for the current user ────────────────────────────────
 
@@ -84,6 +88,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         schedule.setUser(currentUser);
         scheduleRepository.save(schedule);
 
+        NotificationRequest notifRequest = new NotificationRequest();
+        notifRequest.setTitle("Schedule Created");
+        notifRequest.setMessage("Your schedule \"" + schedule.getTitle() + "\" has been created.");
+        notificationService.sendNotification(notifRequest, NotificationType.SCHEDULE);
+
         return new ApiResponse<>(
                 201,
                 true,
@@ -105,6 +114,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         Schedules schedule = scheduleMapper.toEntityFromRecurring(request);
         schedule.setUser(currentUser);
         scheduleRepository.save(schedule);
+
+        NotificationRequest notifRequest = new NotificationRequest();
+        notifRequest.setTitle("Recurring Schedule Created");
+        notifRequest.setMessage("Your recurring schedule \"" + schedule.getTitle() + "\" has been created.");
+        notificationService.sendNotification(notifRequest, NotificationType.SCHEDULE);
 
         return new ApiResponse<>(
                 201,
@@ -138,6 +152,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
 
         scheduleRepository.save(schedule);
+
+        NotificationRequest notifRequest = new NotificationRequest();
+        notifRequest.setTitle("Schedule Updated");
+        notifRequest.setMessage("Your schedule \"" + schedule.getTitle() + "\" has been updated.");
+        notificationService.sendNotification(notifRequest, NotificationType.SCHEDULE);
 
         return new ApiResponse<>(
                 200,
