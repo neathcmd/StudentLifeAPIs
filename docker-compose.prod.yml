@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: studentLife_api_prod
+    restart: always
+    env_file:
+      - .env.prod
+    ports:
+      - "5000:5000"
+    mem_limit: 1g

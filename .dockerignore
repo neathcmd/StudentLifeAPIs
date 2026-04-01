@@ -1,8 +1,8 @@
+target
 .git
-.gitignore
-README.md
-Dockerfile
-target/*
-!.jar          # keep the final jar
-mvnw
-mvnw.cmd
+.idea
+.vscode
+node_modules
+Dockerfile*
+docker-compose*
+.env
