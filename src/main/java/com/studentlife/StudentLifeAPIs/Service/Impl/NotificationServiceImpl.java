@@ -23,7 +23,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
-    private final AuthUtil authUtil;
+    private AuthUtil authUtil;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Override
