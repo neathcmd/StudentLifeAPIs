@@ -24,13 +24,7 @@ services:
       - db
     ports:
       - "5000:5000"
-    networks:
-      - studentlife-network
-
-  networks:
-    studentlife-network:
-      external: true
-  deploy:
+    deploy:
       resources:
         limits:
           memory: 1g
