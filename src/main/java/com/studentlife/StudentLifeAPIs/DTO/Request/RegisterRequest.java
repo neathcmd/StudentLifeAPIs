@@ -14,8 +14,4 @@ public class RegisterRequest {
     @Email(message = "Invalid email format")
     private String email;
     private String password;
-    private String phone;
-    private String university;
-    private String major;
-    private String academicYear;
 }
