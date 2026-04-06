@@ -1,22 +1,61 @@
 package com.studentlife.StudentLifeAPIs.Controller;
 
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import com.studentlife.StudentLifeAPIs.DTO.Request.NotificationRequest;
+import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
+import com.studentlife.StudentLifeAPIs.DTO.Response.NotificationResponse;
+import com.studentlife.StudentLifeAPIs.Enum.NotificationType;
+import com.studentlife.StudentLifeAPIs.Service.NotificationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
+@RequestMapping("/api/v1/notification")
+@RequiredArgsConstructor
 public class NotificationController {
 
-    // Client sends to: /app/test
-    // Server broadcasts to: /topic/notifications
-    @MessageMapping("/test")
-    @SendTo("/topic/notifications")
-    public String sendTestNotification(String message) {
-        return "Server received: " + message;
+    private final NotificationService notificationService;
+
+    /**
+     * POST /api/v1/notification/send?type=SYSTEM
+     * Sends and saves a notification to the authenticated user
+     */
+    @PostMapping("/send")
+    public ResponseEntity<ApiResponse<NotificationResponse>> send(
+            @RequestBody NotificationRequest request,
+            @RequestParam NotificationType type
+    ) {
+        return ResponseEntity.status(201).body(notificationService.sendNotification(request, type));
+    }
+
+    /**
+     * GET /api/v1/notification/unread
+     * Returns unread notifications for a user
+     */
+    @GetMapping("/unread")
+    public ResponseEntity<List<NotificationResponse>> getUnread(@RequestParam Long userId) {
+        return ResponseEntity.ok(notificationService.getUnreadNotifications(userId));
+    }
+
+    /**
+     * GET /api/v1/notification/unread/count
+     * Returns unread notification count (for badge)
+     */
+    @GetMapping("/unread/count")
+    public ResponseEntity<Long> countUnread(@RequestParam Long userId) {
+        return ResponseEntity.ok(notificationService.conutUnread(userId));
+    }
+
+    /**
+     * PUT /api/v1/notification/mark-all-read
+     * Marks all notifications as read for a user
+     */
+    @PutMapping("/mark-all-read")
+    public ResponseEntity<ApiResponse<?>> markAllAsRead(@RequestParam Long userId) {
+        notificationService.markAllAsRead(userId);
+        return ResponseEntity.ok(new ApiResponse<>(200, true, "All notifications marked as read.", null));
     }
 }
-//```
-//
-//Then test using a simple HTML page or a tool like [Postman WebSocket](https://learning.postman.com/docs/sending-requests/websocket/websocket/) connecting to:
-//        ```
-//ws://localhost:8080/ws

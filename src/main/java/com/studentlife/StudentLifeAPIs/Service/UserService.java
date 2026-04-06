@@ -19,6 +19,8 @@ public interface UserService {
 
     ApiResponse<UserResponse> GetProfileInfo();
 
+    ApiResponse<UserResponse> updateUserProfile(UserUpdateRequest request);
+
     void disableUser(Long id);
 
     void deleteUser(Long id);

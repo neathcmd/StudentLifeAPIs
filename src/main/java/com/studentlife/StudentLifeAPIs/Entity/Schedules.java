@@ -70,6 +70,17 @@ public class Schedules {
     @Column(name = "is_important", nullable = false)
     private boolean isImportant = false;
 
+//    /**
+//     * NEW FIELD — nullable.
+//     * Links this schedule event back to its source assignment.
+//     * NULL for regular schedules, non-null for assignment-derived events.
+//     *
+//     * NOT a @ManyToOne — we keep it as a plain Long to avoid
+//     * coupling the Schedule entity to the Assignment entity.
+//     */
+    @Column(name = "assignment_id")
+    private Long assignmentId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;

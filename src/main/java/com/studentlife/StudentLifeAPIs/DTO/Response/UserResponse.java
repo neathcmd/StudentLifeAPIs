@@ -1,7 +1,6 @@
 package com.studentlife.StudentLifeAPIs.DTO.Response;
 
 
-import com.studentlife.StudentLifeAPIs.Entity.Roles;
 import lombok.Builder;
 import lombok.Data;
 
@@ -19,7 +18,7 @@ public class UserResponse {
     private String phone;
     private String university;
     private String major;
-    private String academic_year;
+    private String academicYear;
     private Set<String> roles;
     private Instant createdAt;
     private Instant updatedAt;

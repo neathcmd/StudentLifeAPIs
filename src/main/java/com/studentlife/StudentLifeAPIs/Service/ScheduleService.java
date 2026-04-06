@@ -5,8 +5,10 @@ import com.studentlife.StudentLifeAPIs.DTO.Request.RecurringScheduleRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.ScheduleUpdateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ScheduleResponse;
+import com.studentlife.StudentLifeAPIs.Entity.Users;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ScheduleService {
@@ -28,4 +30,11 @@ public interface ScheduleService {
 
     // Delete a schedule (only the owner can delete)
     ApiResponse<?> deleteSchedule(Long scheduleId);
+
+    Long createAssignmentEvent(            String title,
+                                           String description,
+                                           LocalDateTime dueDate,
+                                           Long assignmentId,
+                                           Users user
+    );
 }

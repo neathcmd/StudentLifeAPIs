@@ -5,9 +5,7 @@ import com.studentlife.StudentLifeAPIs.DTO.Request.UserCreateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.UserUpdateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Response.UserResponse;
 import com.studentlife.StudentLifeAPIs.Entity.Users;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 @Mapper(
         config = MapperConfiguration.class,
@@ -26,6 +24,7 @@ public interface UserMapper {
 
     Users toUserEntityRegisterUser(RegisterRequest request);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserEntity(
             UserUpdateRequest request,
             @MappingTarget Users entity

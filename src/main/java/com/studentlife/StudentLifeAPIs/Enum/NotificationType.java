@@ -4,5 +4,6 @@ public enum NotificationType {
     ASSIGNMENT,
     ANNOUNCEMENT,
     REMINDER,
+    SCHEDULE,
     SYSTEM
 }

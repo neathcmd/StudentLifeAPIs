@@ -109,6 +109,23 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+    @Override
+    public ApiResponse<UserResponse> updateUserProfile(UserUpdateRequest request) {
+
+        Users authUser = authUtil.getAuthenticatedUser();
+
+        userMapper.updateUserEntity(request, authUser);
+
+        Users updatedUser = userRepository.save(authUser);
+
+        return new ApiResponse<>(
+                200,
+                true,
+                "Update profile successfully.",
+                userMapper.toUserResponse(updatedUser)
+        );
+    }
+
     // ─── Disable / Delete ────────────────────────────────────────────────────
 
     @Override

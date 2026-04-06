@@ -20,7 +20,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class assignments {
+public class Assignments {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,12 +37,16 @@ public class assignments {
     private String subject;
 
     @NotNull
-    @Column(name = "due_date")
+    @Column(name = "due_date", nullable = false)
     private Date dueDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AssignmentStatus status = AssignmentStatus.PENDING;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer progress = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
