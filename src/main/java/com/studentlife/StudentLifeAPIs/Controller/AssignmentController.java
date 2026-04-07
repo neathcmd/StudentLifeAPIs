@@ -1,8 +1,10 @@
 package com.studentlife.StudentLifeAPIs.Controller;
 
 import com.studentlife.StudentLifeAPIs.DTO.Request.CreateAssignmentRequest;
+import com.studentlife.StudentLifeAPIs.DTO.Request.InviteRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Request.UpdateProgressRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
+import com.studentlife.StudentLifeAPIs.DTO.Response.AssignmentMemberResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.AssignmentResponse;
 import com.studentlife.StudentLifeAPIs.Service.AssignmentService;
 import jakarta.validation.Valid;
@@ -53,5 +55,34 @@ public class AssignmentController {
             @PathVariable Long id
     ) {
         return ResponseEntity.ok(assignmentService.deleteAssignment(id));
+    }
+
+    @PostMapping("/{id}/invite")
+    public ResponseEntity<ApiResponse<?>> invite(
+            @PathVariable Long id,
+            @Valid @RequestBody InviteRequest request
+    ) {
+        return ResponseEntity.ok(assignmentService.inviteUser(id, request));
+    }
+
+    @PostMapping("/{id}/accept")
+    public ResponseEntity<ApiResponse<?>> accept(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(assignmentService.acceptInvite(id));
+    }
+
+    @PostMapping("/{id}/decline")
+    public ResponseEntity<ApiResponse<?>> decline(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(assignmentService.declineInvite(id));
+    }
+
+    @GetMapping("/{id}/members")
+    public ResponseEntity<ApiResponse<List<AssignmentMemberResponse>>> getMembers(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(assignmentService.getMembers(id));
     }
 }

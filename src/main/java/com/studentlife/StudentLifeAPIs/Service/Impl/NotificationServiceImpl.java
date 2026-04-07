@@ -23,14 +23,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
-    private final AuthUtil authUtil;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional
-    public ApiResponse<NotificationResponse> sendNotification(NotificationRequest request, NotificationType type) {
-
-        Users recipient = authUtil.getAuthenticatedUser();
+    public ApiResponse<NotificationResponse> sendNotification(NotificationRequest request, NotificationType type, Users recipient) {
 
         Notification notification = new Notification();
         notification.setRecipient(recipient);
