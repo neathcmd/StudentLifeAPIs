@@ -1,9 +1,7 @@
 package com.studentlife.StudentLifeAPIs.Entity;
 
-import com.studentlife.StudentLifeAPIs.Enum.AssignmentStatus;
+import com.studentlife.StudentLifeAPIs.Enum.AssignmentMemberStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,46 +10,34 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "assignments")
+@Table(
+        name = "assignment_members",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"assignment_id", "user_id"})
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Assignments {
+public class AssignmentMember {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Column(nullable = false)
-    private String title;
-
-    private String description;
-
-    @NotBlank
-    @Column(nullable = false)
-    private String subject;
-
-    @NotNull
-    @Column(name = "due_date", nullable = false)
-    private LocalDateTime dueDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private AssignmentStatus status = AssignmentStatus.PENDING;
-
-    @Column(nullable = false)
-    @Builder.Default
-    private Integer progress = 0;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignment_id", nullable = false)
+    private Assignments assignment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private AssignmentMemberStatus status = AssignmentMemberStatus.INVITED;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

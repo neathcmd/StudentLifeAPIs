@@ -3,8 +3,10 @@ package com.studentlife.StudentLifeAPIs.Controller;
 import com.studentlife.StudentLifeAPIs.DTO.Request.NotificationRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.NotificationResponse;
+import com.studentlife.StudentLifeAPIs.Entity.Users;
 import com.studentlife.StudentLifeAPIs.Enum.NotificationType;
 import com.studentlife.StudentLifeAPIs.Service.NotificationService;
+import com.studentlife.StudentLifeAPIs.Utils.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,6 +20,7 @@ import java.util.List;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final AuthUtil authUtil;
 
     /**
      * POST /api/v1/notification/send?type=SYSTEM
@@ -28,7 +31,8 @@ public class NotificationController {
             @RequestBody NotificationRequest request,
             @RequestParam NotificationType type
     ) {
-        return ResponseEntity.status(201).body(notificationService.sendNotification(request, type));
+        Users currentUser = authUtil.getAuthenticatedUser();
+        return ResponseEntity.status(201).body(notificationService.sendNotification(request, type, currentUser));
     }
 
     /**

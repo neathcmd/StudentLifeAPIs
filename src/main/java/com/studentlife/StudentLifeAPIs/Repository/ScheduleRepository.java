@@ -10,4 +10,6 @@ public interface ScheduleRepository extends JpaRepository<Schedules, Long>,
         JpaSpecificationExecutor<Schedules> {
 
     boolean existsByTitleAndUserId(String title, Long userId);
+
+    void deleteByAssignmentId(Long assignmentId);
 }

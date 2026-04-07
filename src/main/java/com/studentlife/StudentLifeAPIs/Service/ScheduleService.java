@@ -31,10 +31,9 @@ public interface ScheduleService {
     // Delete a schedule (only the owner can delete)
     ApiResponse<?> deleteSchedule(Long scheduleId);
 
-    Long createAssignmentEvent(            String title,
-                                           String description,
-                                           LocalDateTime dueDate,
-                                           Long assignmentId,
-                                           Users user
+    Long createAssignmentSchedule(
+            String title, String description,
+            LocalDateTime dueDate, Long assignmentId,
+            Users user
     );
 }

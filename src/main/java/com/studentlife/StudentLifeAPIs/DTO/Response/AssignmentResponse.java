@@ -18,6 +18,9 @@ public class AssignmentResponse {
     private Date dueDate;
     private AssignmentStatus status;
     private Integer progress;
+
+    private Long scheduleId;
+
     private Instant createdAt;
     private Instant updatedAt;
 }

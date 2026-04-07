@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 public class CreateAssignmentRequest {
@@ -20,5 +20,5 @@ public class CreateAssignmentRequest {
 
     @NotNull(message = "Due date is required")
     @Future(message = "Due date must be in the future")
-    private Date dueDate;
+    private LocalDateTime dueDate;
 }
