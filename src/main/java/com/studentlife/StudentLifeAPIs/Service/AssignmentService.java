@@ -6,6 +6,7 @@ import com.studentlife.StudentLifeAPIs.DTO.Request.UpdateProgressRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.AssignmentMemberResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.AssignmentResponse;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
 
@@ -28,4 +29,6 @@ public interface AssignmentService {
     ApiResponse<?> declineInvite(Long assignmentId);
 
     ApiResponse<List<AssignmentMemberResponse>> getMembers(Long assignmentId);
+
+    RedirectView processInviteToken(String token, boolean accept);
 }
