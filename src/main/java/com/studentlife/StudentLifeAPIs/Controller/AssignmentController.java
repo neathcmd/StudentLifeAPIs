@@ -30,7 +30,7 @@ public class AssignmentController {
                 .body(assignmentService.createAssignment(request));
     }
 
-    @GetMapping
+    @GetMapping("/my-assignment")
     public ResponseEntity<ApiResponse<List<AssignmentResponse>>> getMyAssignment() {
         return ResponseEntity.ok(assignmentService.getMyAssignments());
     }

@@ -34,6 +34,12 @@ public class AssignmentMember {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
+    @Column(name = "invite_token", unique = true)
+    private String inviteToken;
+
+    @Column(name = "token_expires_at")
+    private Instant tokenExpiresAt;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

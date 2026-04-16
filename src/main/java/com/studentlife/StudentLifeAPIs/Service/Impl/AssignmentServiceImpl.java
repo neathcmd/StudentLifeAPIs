@@ -25,8 +25,13 @@ import com.studentlife.StudentLifeAPIs.Service.ScheduleService;
 import com.studentlife.StudentLifeAPIs.Utils.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.view.RedirectView;
 
+import java.util.UUID;
+import java.time.temporal.ChronoUnit;
+import java.time.Instant;
 import java.util.List;
 
 import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.*;
@@ -44,6 +49,9 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final AssignmentMemberRepository assignmentMemberRepository;
     private final NotificationService notificationService;
     private final EmailService emailService;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     @Override
     public ApiResponse<AssignmentResponse> createAssignment(CreateAssignmentRequest request) {
@@ -191,6 +199,8 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .assignment(assignment)
                 .user(invitedUser)
                 .status(AssignmentMemberStatus.INVITED)
+                .inviteToken(UUID.randomUUID().toString())
+                .tokenExpiresAt(Instant.now().plus(7, ChronoUnit.DAYS))
                 .build();
 
         assignmentMemberRepository.save(member);
@@ -199,7 +209,8 @@ public class AssignmentServiceImpl implements AssignmentService {
                 invitedUser.getEmail(),
                 currentUser.getFullname(),
                 assignment.getTitle(),
-                assignment.getId()
+                assignment.getId(),
+                member.getInviteToken()
         );
 
         NotificationRequest notificationRequest = new NotificationRequest();
@@ -276,7 +287,7 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         Assignments assignment = member.getAssignment();
 
-        emailService.sendDeclinedEmail(
+        emailService.sendInviteDeclinedEmail(
                 assignment.getUser().getEmail(),
                 currentUser.getFullname(),
                 assignment.getTitle()
@@ -323,5 +334,70 @@ public class AssignmentServiceImpl implements AssignmentService {
                 "Get all members successfully",
                 memberResponses
         );
+    }
+
+    @Override
+    @Transactional
+    public RedirectView processInviteToken(String token, boolean accept) {
+
+        AssignmentMember member = assignmentMemberRepository.findByInviteToken(token)
+                .orElse(null);
+
+        if (member == null) {
+            return new RedirectView(frontendUrl + "/invite-invalid");
+        }
+
+        if (Instant.now().isAfter(member.getTokenExpiresAt())) {
+            return new RedirectView(frontendUrl + "/invite-expired");
+        }
+
+        if (member.getStatus() != AssignmentMemberStatus.INVITED) {
+            return new RedirectView(frontendUrl + "/invite-expired");
+        }
+
+        Assignments assignment = member.getAssignment();
+        Users invitedUser = member.getUser();
+
+        if (accept) {
+            member.setStatus(AssignmentMemberStatus.ACCEPTED);
+            assignmentMemberRepository.save(member);
+
+            scheduleService.createAssignmentSchedule(
+                    assignment.getTitle(),
+                    assignment.getDescription(),
+                    assignment.getDueDate(),
+                    assignment.getId(),
+                    invitedUser
+            );
+
+            NotificationRequest notificationRequest = new NotificationRequest();
+            notificationRequest.setTitle("Invite Accepted");
+            notificationRequest.setMessage(invitedUser.getFullname() + " accepted your invitation to \"" + assignment.getTitle() + "\".");
+            notificationService.sendNotification(notificationRequest, NotificationType.INVITE, assignment.getUser());
+
+            emailService.sendInviteAcceptedEmail(
+                    assignment.getUser().getEmail(),
+                    invitedUser.getFullname(),
+                    assignment.getTitle()
+            );
+
+            return new RedirectView(frontendUrl + "/invite?success?assignmentId=" + assignment.getId());
+        } else {
+            member.setStatus(AssignmentMemberStatus.DECLINED);
+            assignmentMemberRepository.save(member);
+
+            NotificationRequest notificationRequest = new NotificationRequest();
+            notificationRequest.setTitle("Invite Declined");
+            notificationRequest.setMessage(invitedUser.getFullname() + " declined your invitation to \"" + assignment.getTitle() + "\".");
+            notificationService.sendNotification(notificationRequest, NotificationType.INVITE, assignment.getUser());
+
+            emailService.sendInviteDeclinedEmail(
+                    assignment.getUser().getEmail(),
+                    invitedUser.getFullname(),
+                    assignment.getTitle()
+            );
+        }
+
+        return new RedirectView(frontendUrl + "/invite/declined");
     }
 }
