@@ -23,12 +23,14 @@ public class CookieUtil {
     ) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .httpOnly(true)
-//                .secure(true)
-                .secure(false)
+                // secure true for prod over HTTPS and secure false for dev
+                .secure(true)
+//                .secure(false)
                 .path("/")
                 .maxAge(Duration.ofSeconds(maxAge))
-//                .sameSite("None")
-                .sameSite("Lax")
+                // sameSite None for prod over HTTPS and sameSite Lax for dev
+                .sameSite("None")
+//                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
@@ -37,12 +39,14 @@ public class CookieUtil {
     public void clearAuthCookie(HttpServletResponse response, String name) {
         ResponseCookie cookie = ResponseCookie.from(name, "")
                 .httpOnly(true)
-//                .secure(true)
-                .secure(false)
+                // secure true for prod over HTTPS and secure false for dev
+                .secure(true)
+//                .secure(false)
                 .path("/")
                 .maxAge(Duration.ZERO)
-//                .sameSite("None")
-                .sameSite("Lax")
+                // sameSite None for prod over HTTPS and sameSite Lax for dev
+                .sameSite("None")
+//                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
