@@ -49,6 +49,14 @@ public class Assignments {
     @Builder.Default
     private Integer progress = 0;
 
+    /**
+     * Links this assignment back to its auto-generated schedule.
+     * Set once on creation, cleared if the schedule is deleted.
+     * Plain Long (not @ManyToOne) to avoid circular entity coupling.
+     */
+    @Column(name = "schedule_id")
+    private Long scheduleId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;

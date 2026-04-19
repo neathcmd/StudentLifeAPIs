@@ -54,6 +54,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     private String frontendUrl;
 
     @Override
+    @Transactional
     public ApiResponse<AssignmentResponse> createAssignment(AssignmentRequest request) {
         Users currentUser = authUtil.getAuthenticatedUser();
 
@@ -70,8 +71,11 @@ public class AssignmentServiceImpl implements AssignmentService {
                 currentUser
         );
 
+        // ← THE FIX: set scheduleId on the ENTITY before saving, not just the DTO
+        assignment.setScheduleId(scheduleId);
+        assignmentRepository.save(assignment);
+
         AssignmentResponse response = assignmentMapper.toResponse(assignment);
-        response.setScheduleId(scheduleId);
 
         return new ApiResponse<>(
                 201,
@@ -370,15 +374,15 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .orElse(null);
 
         if (member == null) {
-            return new RedirectView(frontendUrl + "/invite-invalid");
+            return new RedirectView(frontendUrl + "/invite/result?status=invalid");
         }
 
         if (Instant.now().isAfter(member.getTokenExpiresAt())) {
-            return new RedirectView(frontendUrl + "/invite-expired");
+            return new RedirectView(frontendUrl + "/invite/result?status=expired");
         }
 
         if (member.getStatus() != AssignmentMemberStatus.INVITED) {
-            return new RedirectView(frontendUrl + "/invite-expired");
+            return new RedirectView(frontendUrl + "/invite/result?status=already_responded");
         }
 
         Assignments assignment = member.getAssignment();
@@ -407,7 +411,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                     assignment.getTitle()
             );
 
-            return new RedirectView(frontendUrl + "/invite?success?assignmentId=" + assignment.getId());
+            return new RedirectView(frontendUrl + "/invite/result?status=accepted&assignmentId=" + assignment.getId());
         } else {
             member.setStatus(AssignmentMemberStatus.DECLINED);
             assignmentMemberRepository.save(member);
@@ -424,6 +428,6 @@ public class AssignmentServiceImpl implements AssignmentService {
             );
         }
 
-        return new RedirectView(frontendUrl + "/invite/declined");
+        return new RedirectView(frontendUrl + "/invite/result?status=declined&assignmentId=" + assignment.getId());
     }
 }
