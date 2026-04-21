@@ -107,28 +107,15 @@ public class AuthServiceImpl implements AuthService {
         RefreshToken newToken = new RefreshToken();
         newToken.setToken(newRefreshToken);
         newToken.setUsers(user);
-        newToken.setExpiresAt(
-                Instant.now().plus(30, ChronoUnit.DAYS)
-        );
+        newToken.setExpiresAt(Instant.now().plus(30, ChronoUnit.DAYS));
 
         refreshTokenRepository.save(newToken);
 
         // ========================
         // STORE NEW TOKENS IN HTTP-ONLY COOKIES
         // ========================
-        cookieUtil.setAuthCookie(
-                response,
-                "accessToken",
-                newAccessToken,
-                300
-        );
-
-        cookieUtil.setAuthCookie(
-                response,
-                "refreshToken",
-                newRefreshToken,
-                259200
-        );
+        cookieUtil.setAccessTokenCookie(response, newAccessToken);
+        cookieUtil.setRefreshTokenCookie(response, newRefreshToken);
 
         return new ApiResponse<>(
                 201,
@@ -187,34 +174,20 @@ public class AuthServiceImpl implements AuthService {
         // ========================
         // GENERATE REFRESH TOKEN
         // ========================
-//        refreshTokenRepository.deleteByUsers(savedUser);
         String refreshTokenValue = UUID.randomUUID().toString();
 
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setToken(refreshTokenValue);
         refreshToken.setUsers(user);
-        refreshToken.setExpiresAt(
-                Instant.now().plus(30, ChronoUnit.DAYS)
-        );
+        refreshToken.setExpiresAt(Instant.now().plus(30, ChronoUnit.DAYS));
 
         refreshTokenRepository.save(refreshToken);
 
         // ========================
         // SAVE TOKENS IN COOKIE
         // ========================
-        cookieUtil.setAuthCookie(
-                response,
-                "accessToken",
-                accessToken,
-                900 // 15 minutes
-        );
-
-        cookieUtil.setAuthCookie(
-                response,
-                "refreshToken",
-                refreshTokenValue,
-                259200 // 30 days
-        );
+        cookieUtil.setAccessTokenCookie(response, accessToken);
+        cookieUtil.setRefreshTokenCookie(response, refreshTokenValue);
 
         // ========================
         // MAP USER TO RESPONSE USING MAPSTRUCT
@@ -236,16 +209,16 @@ public class AuthServiceImpl implements AuthService {
         // ========================
         // VALIDATE USER CREDENTIAL WITH AUTHENTICATION MANAGER
         // ========================
-       try {
-           Authentication authentication = authenticationManager.authenticate(
-                   new UsernamePasswordAuthenticationToken(
-                           request.getEmail_or_username(),
-                           request.getPassword()
-                   )
-           );
-       } catch (AuthenticationException e) {
-           throw validation("Login failed. Please check your credentials.");
-       }
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail_or_username(),
+                            request.getPassword()
+                    )
+            );
+        } catch (AuthenticationException e) {
+            throw validation("Login failed. Please check your credentials.");
+        }
 
         // ========================
         // Find user by check both email or username
@@ -254,10 +227,8 @@ public class AuthServiceImpl implements AuthService {
                 .or(() -> userRepository.findByUsername(request.getEmail_or_username()))
                 .orElseThrow(() -> notFound("User not exist."));
 
-
         // ========================
         // EXTRACT ROLE NAME FROM AN EXISTING USER
-        // (Whoever was trying to Log in extract their role name then display it in the response.)
         // ========================
         List<String> roles = user.getRoles()
                 .stream()
@@ -288,28 +259,15 @@ public class AuthServiceImpl implements AuthService {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setToken(refreshTokenValue);
         refreshToken.setUsers(user);
-        refreshToken.setExpiresAt(
-                Instant.now().plus(30, ChronoUnit.DAYS)
-        );
+        refreshToken.setExpiresAt(Instant.now().plus(30, ChronoUnit.DAYS));
 
         refreshTokenRepository.save(refreshToken);
 
         // ========================
         // SAVE TOKENS IN COOKIE
         // ========================
-        cookieUtil.setAuthCookie(
-                response,
-                "accessToken",
-                accessToken,
-                300 // 5 minutes
-        );
-
-        cookieUtil.setAuthCookie(
-                response,
-                "refreshToken",
-                refreshTokenValue,
-                259200 // 30 days
-        );
+        cookieUtil.setAccessTokenCookie(response, accessToken);
+        cookieUtil.setRefreshTokenCookie(response, refreshTokenValue);
 
         return new ApiResponse<>(
                 200,
@@ -337,6 +295,6 @@ public class AuthServiceImpl implements AuthService {
                 200,
                 true,
                 "User logout successfully."
-                );
+        );
     }
 }

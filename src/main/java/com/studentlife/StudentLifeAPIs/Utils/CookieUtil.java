@@ -12,41 +12,42 @@ import java.time.Duration;
 @Component
 public class CookieUtil {
 
-//    @Value("${app.secure-cookie:false}") // false for local, true for production
-//    private boolean secureCookie;
+    @Value("${spring.access-token-expire}")
+    private long accessTokenExpireMs;
 
-    public void setAuthCookie(
-            HttpServletResponse response,
-            String name,
-            String value,
-            int maxAge
-    ) {
-        ResponseCookie cookie = ResponseCookie.from(name, value)
+    @Value("${spring.refresh-token-expire}")
+    private long refreshTokenExpireMs;
+
+    @Value("${app.secure-cookie:false}")
+    private boolean secureCookie;
+
+    private ResponseCookie buildCookie(String name, String value, long maxAgeSeconds) {
+        return ResponseCookie.from(name, value)
                 .httpOnly(true)
-                // secure true for prod over HTTPS and secure false for dev
-                .secure(true)
-//                .secure(false)
+                .secure(secureCookie)
                 .path("/")
-                .maxAge(Duration.ofSeconds(maxAge))
-                // sameSite None for prod over HTTPS and sameSite Lax for dev
-                .sameSite("None")
-//                .sameSite("Lax")
+                .maxAge(Duration.ofSeconds(maxAgeSeconds))
+                .sameSite(secureCookie ? "None" : "Lax")
                 .build();
+    }
 
-        response.addHeader("Set-Cookie", cookie.toString());
+    public void setAccessTokenCookie(HttpServletResponse response, String value) {
+        long maxAge = accessTokenExpireMs / 1000;
+        response.addHeader("Set-Cookie", buildCookie("accessToken", value, maxAge).toString());
+    }
+
+    public void setRefreshTokenCookie(HttpServletResponse response, String value) {
+        long maxAge = refreshTokenExpireMs / 1000;
+        response.addHeader("Set-Cookie", buildCookie("refreshToken", value, maxAge).toString());
     }
 
     public void clearAuthCookie(HttpServletResponse response, String name) {
         ResponseCookie cookie = ResponseCookie.from(name, "")
                 .httpOnly(true)
-                // secure true for prod over HTTPS and secure false for dev
-                .secure(true)
-//                .secure(false)
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(Duration.ZERO)
-                // sameSite None for prod over HTTPS and sameSite Lax for dev
-                .sameSite("None")
-//                .sameSite("Lax")
+                .sameSite(secureCookie ? "None" : "Lax")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
