@@ -47,6 +47,7 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
+                                .requestMatchers("/").permitAll()
                                 .requestMatchers(
                                         "/ws/**",          // ✅ Allow WebSocket handshake
                                         "/ws/websocket/**" // ✅ Allow SockJS fallback
