@@ -47,13 +47,12 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/").permitAll()
                                 .requestMatchers(
                                         "/ws/**",          // ✅ Allow WebSocket handshake
                                         "/ws/websocket/**" // ✅ Allow SockJS fallback
                                 ).permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/health").permitAll()
                                 .requestMatchers("/invite/accept", "invite/decline").permitAll()
                                 .requestMatchers("/api/v1/me").authenticated()
                                 .requestMatchers("/api/v1/schedule/**").hasRole("student")
