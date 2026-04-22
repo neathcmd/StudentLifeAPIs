@@ -21,4 +21,8 @@ public interface AssignmentMemberRepository extends JpaRepository<AssignmentMemb
     boolean existsByAssignmentIdAndUserId(Long assignmentId, Long userId);
 
     Optional<AssignmentMember> findByInviteToken(String inviteToken);
+
+    boolean existsByAssignmentIdAndUserIdAndStatus(
+            Long assignmentId, Long userId, AssignmentMemberStatus status
+    );
 }

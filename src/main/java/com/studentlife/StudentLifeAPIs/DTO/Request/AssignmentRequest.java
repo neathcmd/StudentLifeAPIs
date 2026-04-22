@@ -18,6 +18,9 @@ public class AssignmentRequest {
     @NotBlank(message = "Subject is required")
     private String subject;
 
+    @NotNull(message = "Start date is required")
+    private LocalDateTime startDate;
+
     @NotNull(message = "Due date is required")
     @Future(message = "Due date must be in the future")
     private LocalDateTime dueDate;

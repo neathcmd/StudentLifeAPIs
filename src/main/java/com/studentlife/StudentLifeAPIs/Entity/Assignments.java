@@ -37,6 +37,10 @@ public class Assignments {
     private String subject;
 
     @NotNull
+    @Column(name = "start_date", nullable = false)
+    private LocalDateTime startDate;
+
+    @NotNull
     @Column(name = "due_date", nullable = false)
     private LocalDateTime dueDate;
 

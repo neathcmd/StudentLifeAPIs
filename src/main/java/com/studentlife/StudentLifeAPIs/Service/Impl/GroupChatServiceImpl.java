@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,25 +45,24 @@ public class GroupChatServiceImpl implements GroupChatService {
         Users currentUser = authUtil.getAuthenticatedUser();
         Long userId = currentUser.getId();
 
-        // List all assignment group I own
+        // Assignments I own
         List<Assignments> ownedAssignments = assignmentRepository.findByUserId(userId);
 
-        // List all assignment group I had accept and was invited to
-        List<Assignments> memberAssignments = assignmentMemberRepository.findByAssignmentIdAndStatus(userId, AssignmentMemberStatus.ACCEPTED)
+        // Assignments I was invited to and accepted
+        // FIX 1: was passing userId as assignmentId — now uses correct method
+        List<Assignments> memberAssignments = assignmentMemberRepository
+                .findByUserIdAndStatus(userId, AssignmentMemberStatus.ACCEPTED)
                 .stream()
                 .map(AssignmentMember::getAssignment)
                 .toList();
 
-        // combine both list to avoid duplicates
+        // Merge without duplicates
         Set<Long> seen = new HashSet<>();
         List<Assignments> allGroups = new java.util.ArrayList<>();
 
+        // FIX 2: owner always sees their group, no hasMembers gate
         for (Assignments a : ownedAssignments) {
-            // Only include owned assignments that have at least 1 accepted member
-            boolean hasMembers = assignmentMemberRepository
-                    .findByAssignmentIdAndStatus(a.getId(), AssignmentMemberStatus.ACCEPTED)
-                    .size() > 0;
-            if (hasMembers && seen.add(a.getId())) {
+            if (seen.add(a.getId())) {
                 allGroups.add(a);
             }
         }
@@ -75,14 +73,11 @@ public class GroupChatServiceImpl implements GroupChatService {
             }
         }
 
-        // Build GroupResponse for each
         List<GroupResponse> groups = allGroups.stream().map(a -> {
-            // Get member count
-            int memberCount = assignmentMemberRepository
+            int memberCount = (int) assignmentMemberRepository
                     .findByAssignmentIdAndStatus(a.getId(), AssignmentMemberStatus.ACCEPTED)
                     .size() + 1; // +1 for owner
 
-            // Get last message preview
             List<GroupMessage> messages = groupMessageRepository
                     .findByAssignmentIdOrderByCreatedAtAsc(a.getId());
 
@@ -127,27 +122,27 @@ public class GroupChatServiceImpl implements GroupChatService {
         Assignments assignment = assignmentRepository.findById(request.getAssignmentId())
                 .orElseThrow(() -> notFound("Assignment not found."));
 
-        // verify sender is the owner or the accepted member
         boolean isOwner = assignment.getUser().getId().equals(senderId);
         boolean isMember = assignmentMemberRepository
                 .findByAssignmentIdAndUserId(request.getAssignmentId(), senderId)
                 .map(m -> m.getStatus() == AssignmentMemberStatus.ACCEPTED)
                 .orElse(false);
 
-        // check if the user are a group member if user is a group member they are allow to sent message
-        // if not they are not allowed
         if (!isOwner && !isMember) {
-            throw forbidden("You are no a member of this group.");
+            throw forbidden("You are not a member of this group.");
         }
 
-        // get sender
-        Users sender = assignment.getUser().getId().equals(senderId)
-                ? assignment.getUser()
-                : assignmentMemberRepository
-                .findByAssignmentIdAndUserId(request.getAssignmentId(), senderId)
-                .get().getUser();
+        // FIX 4: safe sender resolution, no raw .get()
+        Users sender;
+        if (isOwner) {
+            sender = assignment.getUser();
+        } else {
+            sender = assignmentMemberRepository
+                    .findByAssignmentIdAndUserId(request.getAssignmentId(), senderId)
+                    .orElseThrow(() -> notFound("Member not found."))
+                    .getUser();
+        }
 
-        // save message
         GroupMessage message = GroupMessage.builder()
                 .assignmentId(request.getAssignmentId())
                 .sender(sender)
@@ -157,8 +152,6 @@ public class GroupChatServiceImpl implements GroupChatService {
         GroupMessage saved = groupMessageRepository.save(message);
         GroupMessageResponse response = groupMessageMapper.toResponse(saved);
 
-        // Broadcast to all group members via WebSocket
-        // Frontend subscribes to /topic/group/{assignmentId}
         messagingTemplate.convertAndSend(
                 "/topic/group/" + request.getAssignmentId(),
                 response
@@ -176,7 +169,8 @@ public class GroupChatServiceImpl implements GroupChatService {
         Assignments assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> notFound("Assignment not found."));
 
-        boolean isOwner = assignment.getUser().getIsActive().equals(currentUser.getIsActive());
+        // FIX 3: was comparing isActive flags, now correctly compares IDs
+        boolean isOwner = assignment.getUser().getId().equals(currentUser.getId());
         boolean isMember = assignmentMemberRepository
                 .findByAssignmentIdAndUserId(assignmentId, currentUser.getId())
                 .map(m -> m.getStatus() == AssignmentMemberStatus.ACCEPTED)

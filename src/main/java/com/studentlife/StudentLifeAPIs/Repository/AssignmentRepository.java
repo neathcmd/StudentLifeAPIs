@@ -13,7 +13,19 @@ import java.util.List;
 @Repository
 public interface AssignmentRepository extends JpaRepository<Assignments, Long> {
 
-    List<Assignments> findByUserId(Long userId);
+    @Query("""
+    SELECT a FROM Assignments a
+    WHERE a.user.id = :userId
+    OR EXISTS (
+        SELECT m FROM AssignmentMember m
+        WHERE m.assignment = a
+        AND m.user.id = :userId
+        AND m.status = com.studentlife.StudentLifeAPIs.Enum.AssignmentMemberStatus.ACCEPTED
+    )
+""")
+    List<Assignments> findAllAccessibleByUserId(@Param("userId") Long userId);
+
+//    List<Assignments> findByUserId(Long userId);
 
     /**
      * Find all active assignments whose due date falls within a time window.
