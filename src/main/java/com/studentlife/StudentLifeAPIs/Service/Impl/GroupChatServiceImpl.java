@@ -46,7 +46,7 @@ public class GroupChatServiceImpl implements GroupChatService {
         Long userId = currentUser.getId();
 
         // Assignments I own
-        List<Assignments> ownedAssignments = assignmentRepository.findByUserId(userId);
+        List<Assignments> ownedAssignments = assignmentRepository.findAllAccessibleByUserId(userId);
 
         // Assignments I was invited to and accepted
         // FIX 1: was passing userId as assignmentId — now uses correct method
