@@ -65,6 +65,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         Long scheduleId = scheduleService.createAssignmentSchedule(
                 assignment.getTitle(),
                 assignment.getDescription(),
+                assignment.getStartDate(),
                 assignment.getDueDate(),
                 assignment.getId(),
                 currentUser
@@ -288,6 +289,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         scheduleService.createAssignmentSchedule(
                 assignment.getTitle(),
                 assignment.getDescription(),
+                assignment.getStartDate(),
                 assignment.getDueDate(),
                 assignment.getId(),
                 currentUser
@@ -400,6 +402,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             scheduleService.createAssignmentSchedule(
                     assignment.getTitle(),
                     assignment.getDescription(),
+                    assignment.getStartDate(),
                     assignment.getDueDate(),
                     assignment.getId(),
                     invitedUser

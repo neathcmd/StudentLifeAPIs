@@ -34,10 +34,13 @@ public class ScheduleSpecification {
                 LocalDateTime from = startDate.atStartOfDay();
                 LocalDateTime to   = endDate.atTime(23, 59, 59);
 
-                // ONE_TIME: startTime must fall within range
+                // ONE_TIME: show if the event overlaps with the requested date range
                 Predicate isOneTime = cb.equal(root.get("type"), ScheduleType.ONE_TIME);
-                Predicate inRange   = cb.between(root.get("startTime"), from, to);
-                Predicate oneTimeInRange = cb.and(isOneTime, inRange);
+                Predicate overlaps = cb.and(
+                        cb.lessThanOrEqualTo(root.get("startTime"), to),    // starts before range ends
+                        cb.greaterThanOrEqualTo(root.get("endTime"), from)  // ends after range starts
+                );
+                Predicate oneTimeInRange = cb.and(isOneTime, overlaps);
 
                 // RECURRING: always show regardless of date range
                 Predicate isRecurring = cb.equal(root.get("type"), ScheduleType.RECURRING);

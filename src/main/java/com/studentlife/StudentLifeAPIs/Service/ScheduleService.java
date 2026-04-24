@@ -33,7 +33,9 @@ public interface ScheduleService {
 
     Long createAssignmentSchedule(
             String title, String description,
-            LocalDateTime dueDate, Long assignmentId,
+            LocalDateTime startDate,
+            LocalDateTime dueDate,
+            Long assignmentId,
             Users user
     );
 }
