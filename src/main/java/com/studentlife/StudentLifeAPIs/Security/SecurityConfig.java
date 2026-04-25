@@ -86,10 +86,7 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://localhost:5173",
                 "https://student-life-platform.vercel.app",
-                "http://127.0.0.1:5500",
-                "https://radar-manhattan-navy-wma.trycloudflare.com",     // 👈 frontend
-                "https://womens-istanbul-colored-carbon.trycloudflare.com" // 👈 backend
-//                "https://exist-reproduce-solve-photo.trycloudflare.com"
+                "http://127.0.0.1:5500"
 
         ));
 
