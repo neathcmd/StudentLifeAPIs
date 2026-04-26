@@ -1,9 +1,12 @@
 package com.studentlife.StudentLifeAPIs.Script;
 
 import com.studentlife.StudentLifeAPIs.Entity.Assignments;
+import com.studentlife.StudentLifeAPIs.Entity.Schedules;
 import com.studentlife.StudentLifeAPIs.Entity.Users;
 import com.studentlife.StudentLifeAPIs.Enum.AssignmentStatus;
+import com.studentlife.StudentLifeAPIs.Enum.ScheduleType;
 import com.studentlife.StudentLifeAPIs.Repository.AssignmentRepository;
+import com.studentlife.StudentLifeAPIs.Repository.ScheduleRepository;
 import com.studentlife.StudentLifeAPIs.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +24,8 @@ import java.util.List;
 public class AssignmentSeeder implements CommandLineRunner {
 
     private final AssignmentRepository assignmentRepository;
-    private final UserRepository userRepository;
+    private final ScheduleRepository   scheduleRepository;
+    private final UserRepository       userRepository;
 
     private static final String TARGET_EMAIL = "salmonineath31@gmail.com";
 
@@ -37,9 +41,10 @@ public class AssignmentSeeder implements CommandLineRunner {
             return;
         }
 
-        List<Assignments> assignments = List.of(
+        List<Assignments> drafts = List.of(
 
-                // COMPLETED
+                // ── COMPLETED ────────────────────────────────────────────────────────
+
                 Assignments.builder()
                         .title("Build a RESTful API with Spring Boot")
                         .description("Design and implement a full CRUD API with JWT authentication and role-based access control.")
@@ -62,7 +67,8 @@ public class AssignmentSeeder implements CommandLineRunner {
                         .user(user)
                         .build(),
 
-                // OVERDUE
+                // ── OVERDUE ──────────────────────────────────────────────────────────
+
                 Assignments.builder()
                         .title("Essay — Impact of AI on Education")
                         .description("Write a 2000-word academic essay discussing AI tools and their effects on modern learning.")
@@ -85,7 +91,8 @@ public class AssignmentSeeder implements CommandLineRunner {
                         .user(user)
                         .build(),
 
-                // IN_PROGRESS
+                // ── IN_PROGRESS ──────────────────────────────────────────────────────
+
                 Assignments.builder()
                         .title("UI/UX Prototype — Student Life App")
                         .description("Design a high-fidelity Figma prototype with at least 10 screens and a usability report.")
@@ -119,7 +126,8 @@ public class AssignmentSeeder implements CommandLineRunner {
                         .user(user)
                         .build(),
 
-                // PENDING
+                // ── PENDING ──────────────────────────────────────────────────────────
+
                 Assignments.builder()
                         .title("Research Paper — Cloud Computing Security")
                         .description("Survey current threats, mitigation strategies, and case studies in cloud security.")
@@ -154,7 +162,32 @@ public class AssignmentSeeder implements CommandLineRunner {
                         .build()
         );
 
-        assignmentRepository.saveAll(assignments);
-        log.info("10 assignments seeded successfully for user '{}'.", TARGET_EMAIL);
+        for (Assignments draft : drafts) {
+
+            // Step 1 — save assignment first to get its generated ID
+            Assignments saved = assignmentRepository.save(draft);
+
+            // Step 2 — create the owner's schedule row linked to this assignment
+            Schedules schedule = scheduleRepository.save(
+                    Schedules.builder()
+                            .title(saved.getTitle())
+                            .description(saved.getDescription())
+                            .type(ScheduleType.ONE_TIME)
+                            .startTime(saved.getStartDate())
+                            .endTime(saved.getDueDate())
+                            .assignmentId(saved.getId())   // schedule → assignment
+                            .isImportant(false)
+                            .user(user)
+                            .build()
+            );
+
+            // Step 3 — write scheduleId back onto the assignment so the link is bidirectional
+            saved.setScheduleId(schedule.getId());        // assignment → schedule
+            assignmentRepository.save(saved);
+
+            log.info("Seeded assignment '{}' ↔ scheduleId={}.", saved.getTitle(), schedule.getId());
+        }
+
+        log.info("10 assignments + 10 owner schedules seeded for '{}'.", TARGET_EMAIL);
     }
 }
