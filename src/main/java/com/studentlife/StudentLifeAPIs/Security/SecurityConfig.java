@@ -48,8 +48,8 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(
-                                        "/ws/**",          // ✅ Allow WebSocket handshake
-                                        "/ws/websocket/**" // ✅ Allow SockJS fallback
+                                        "/api/v1/ws/**",          // ✅ Allow WebSocket handshake
+                                        "/api/v1/ws/websocket/**" // ✅ Allow SockJS fallback
                                 ).permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/health").permitAll()
