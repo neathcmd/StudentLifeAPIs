@@ -9,15 +9,13 @@ import com.studentlife.StudentLifeAPIs.DTO.Response.AssignmentMemberResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.AssignmentResponse;
 import com.studentlife.StudentLifeAPIs.Entity.AssignmentMember;
 import com.studentlife.StudentLifeAPIs.Entity.Assignments;
+import com.studentlife.StudentLifeAPIs.Entity.GroupChatMember;
 import com.studentlife.StudentLifeAPIs.Entity.Users;
 import com.studentlife.StudentLifeAPIs.Enum.AssignmentMemberStatus;
 import com.studentlife.StudentLifeAPIs.Enum.AssignmentStatus;
 import com.studentlife.StudentLifeAPIs.Enum.NotificationType;
 import com.studentlife.StudentLifeAPIs.Mapper.AssignmentMapper;
-import com.studentlife.StudentLifeAPIs.Repository.AssignmentMemberRepository;
-import com.studentlife.StudentLifeAPIs.Repository.AssignmentRepository;
-import com.studentlife.StudentLifeAPIs.Repository.ScheduleRepository;
-import com.studentlife.StudentLifeAPIs.Repository.UserRepository;
+import com.studentlife.StudentLifeAPIs.Repository.*;
 import com.studentlife.StudentLifeAPIs.Service.AssignmentService;
 import com.studentlife.StudentLifeAPIs.Service.EmailService;
 import com.studentlife.StudentLifeAPIs.Service.NotificationService;
@@ -40,6 +38,7 @@ import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.*
 @RequiredArgsConstructor
 public class AssignmentServiceImpl implements AssignmentService {
 
+    private final GroupChatMemberRepository groupChatMemberRepository;
     private final AssignmentRepository assignmentRepository;
     private final AuthUtil authUtil;
     private final AssignmentMapper assignmentMapper;
@@ -66,6 +65,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         Long scheduleId = scheduleService.createAssignmentSchedule(
                 assignment.getTitle(),
                 assignment.getDescription(),
+                assignment.getStartDate(),
                 assignment.getDueDate(),
                 assignment.getId(),
                 currentUser
@@ -91,7 +91,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         Users currentUser = authUtil.getAuthenticatedUser();
 
         List<AssignmentResponse> responses = assignmentRepository
-                .findByUserId(currentUser.getId())
+                .findAllAccessibleByUserId(currentUser.getId())
                 .stream()
                 .map(assignmentMapper::toResponse)
                 .toList();
@@ -112,7 +112,12 @@ public class AssignmentServiceImpl implements AssignmentService {
         Assignments assignment = assignmentRepository.findById(id)
                 .orElseThrow(() -> notFound("Assignment not found."));
 
-        if (!assignment.getUser().getId().equals(currentUser.getId())) {
+        boolean isOwner = assignment.getUser().getId().equals(currentUser.getId());
+        boolean isMember = assignmentMemberRepository.existsByAssignmentIdAndUserIdAndStatus(
+                id, currentUser.getId(), AssignmentMemberStatus.ACCEPTED
+        );
+
+        if (!isOwner && !isMember) {
             throw forbidden("You do not have access to this resource.");
         }
 
@@ -273,6 +278,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignmentMemberRepository.save(member);
 
         Assignments assignment = member.getAssignment();
+        addToGroupChat(assignment.getId(), assignment.getUser(), currentUser);
 
         emailService.sendInviteAcceptedEmail(
                 assignment.getUser().getEmail(),
@@ -283,6 +289,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         scheduleService.createAssignmentSchedule(
                 assignment.getTitle(),
                 assignment.getDescription(),
+                assignment.getStartDate(),
                 assignment.getDueDate(),
                 assignment.getId(),
                 currentUser
@@ -395,10 +402,13 @@ public class AssignmentServiceImpl implements AssignmentService {
             scheduleService.createAssignmentSchedule(
                     assignment.getTitle(),
                     assignment.getDescription(),
+                    assignment.getStartDate(),
                     assignment.getDueDate(),
                     assignment.getId(),
                     invitedUser
             );
+
+            addToGroupChat(assignment.getId(), assignment.getUser(), invitedUser);
 
             NotificationRequest notificationRequest = new NotificationRequest();
             notificationRequest.setTitle("Invite Accepted");
@@ -429,5 +439,26 @@ public class AssignmentServiceImpl implements AssignmentService {
         }
 
         return new RedirectView(frontendUrl + "/invite/result?status=declined&assignmentId=" + assignment.getId());
+    }
+
+    private void addToGroupChat(Long assignmentId, Users owner, Users invitee) {
+        // Add owner if not already in chat
+        if (!groupChatMemberRepository.existsByAssignmentIdAndUserId(assignmentId, owner.getId())) {
+            groupChatMemberRepository.save(
+                    GroupChatMember.builder()
+                            .assignmentId(assignmentId)
+                            .user(owner)
+                            .build()
+            );
+        }
+        // Add invitee
+        if (!groupChatMemberRepository.existsByAssignmentIdAndUserId(assignmentId, invitee.getId())) {
+            groupChatMemberRepository.save(
+                    GroupChatMember.builder()
+                            .assignmentId(assignmentId)
+                            .user(invitee)
+                            .build()
+            );
+        }
     }
 }

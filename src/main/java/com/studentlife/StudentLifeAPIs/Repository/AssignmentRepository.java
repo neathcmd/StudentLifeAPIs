@@ -1,6 +1,8 @@
 package com.studentlife.StudentLifeAPIs.Repository;
 
 import com.studentlife.StudentLifeAPIs.Entity.Assignments;
+import com.studentlife.StudentLifeAPIs.Entity.Users;
+import com.studentlife.StudentLifeAPIs.Enum.AssignmentMemberStatus;
 import com.studentlife.StudentLifeAPIs.Enum.AssignmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +15,25 @@ import java.util.List;
 @Repository
 public interface AssignmentRepository extends JpaRepository<Assignments, Long> {
 
-    List<Assignments> findByUserId(Long userId);
+    @Query(value = """
+    SELECT a.* FROM assignments a
+    WHERE a.user_id = :userId
+    OR EXISTS (
+        SELECT 1 FROM assignment_members m
+        WHERE m.assignment_id = a.id
+        AND m.user_id = :userId
+        AND m.status = 'ACCEPTED'
+    )
+""", nativeQuery = true)
+    List<Assignments> findAllAccessibleByUserId(
+            @Param("userId") Long userId
+    );
+
+    boolean existsByUser(Users user);
+
+    List<Assignments> findByUser(Users user);
+
+//    List<Assignments> findByUserId(Long userId);
 
     /**
      * Find all active assignments whose due date falls within a time window.

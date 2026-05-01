@@ -10,10 +10,10 @@ import java.net.http.HttpRequest;
 
 public interface AuthService {
 
-    ApiResponse<?> refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response
-    );
+//    ApiResponse<?> refreshToken(
+//            HttpServletRequest request,
+//            HttpServletResponse response
+//    );
 
     ApiResponse<?> register(
             RegisterRequest request,
@@ -27,9 +27,9 @@ public interface AuthService {
             HttpServletResponse response
     );
 
-    ApiResponse<Object> logout(
-            HttpServletRequest request,
-            HttpServletResponse response
-    );
+//    ApiResponse<Object> logout(
+//            HttpServletRequest request,
+//            HttpServletResponse response
+//    );
 
 }

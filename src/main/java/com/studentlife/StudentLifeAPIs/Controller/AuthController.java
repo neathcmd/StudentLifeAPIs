@@ -20,15 +20,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
-
-    @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) {
-        ApiResponse<?> refreshTokenResponse = authService.refreshToken(request, response);
-        return ResponseEntity.ok(refreshTokenResponse);
-    }
+//
+//    @PostMapping("/refresh-token")
+//    public ResponseEntity<?> refreshToken(
+//            HttpServletRequest request,
+//            HttpServletResponse response
+//    ) {
+//        ApiResponse<?> refreshTokenResponse = authService.refreshToken(request, response);
+//        return ResponseEntity.ok(refreshTokenResponse);
+//    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(
@@ -50,8 +50,8 @@ public class AuthController {
         return ResponseEntity.status(loginResponse.getStatus()).body(loginResponse);
     }
 
-    @PostMapping("/logout")
-    public ApiResponse<Object> logout(HttpServletRequest request, HttpServletResponse response) {
-        return authService.logout(request, response);
-    }
+//    @PostMapping("/logout")
+//    public ApiResponse<Object> logout(HttpServletRequest request, HttpServletResponse response) {
+//        return authService.logout(request, response);
+//    }
 }

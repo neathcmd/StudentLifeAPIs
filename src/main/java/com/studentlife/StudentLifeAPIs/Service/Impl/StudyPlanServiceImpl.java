@@ -37,12 +37,12 @@ public class StudyPlanServiceImpl implements StudyPlanService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${gemini.api.key}")
-    private String geminiApiKey;
+    @Value("${groq.api.key}")
+    private String groqApiKey;
 
 //    :TODO put it in env after testing after it work
-    private static final String GEMINI_URL =
-            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-8b:generateContent?key=";
+    private static final String GROQ_URL =
+        "https://api.groq.com/openai/v1/chat/completions";
 
     private static final DateTimeFormatter DISPLAY_FMT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -101,7 +101,7 @@ public class StudyPlanServiceImpl implements StudyPlanService {
                 basicPlan
         );
 
-        String plan = callGemini(prompt);
+        String plan = callGroq(prompt);
 
         return new ApiResponse<>(
                 200,
@@ -129,35 +129,31 @@ public class StudyPlanServiceImpl implements StudyPlanService {
         }
     }
 
-    private String callGemini(String prompt) {
+    private String callGroq(String prompt) {
         try {
-            String url = GEMINI_URL + geminiApiKey;
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(groqApiKey);
 
             Map<String, Object> body = Map.of(
-                    "contents", new Object[]{
-                            Map.of("parts", new Object[]{
-                                    Map.of("text", prompt)
-                            })
+                    "model", "llama-3.1-8b-instant",
+                    "messages", new Object[]{
+                            Map.of("role", "user", "content", prompt)
                     }
             );
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(GROQ_URL, request, String.class);
 
-            // Parse response
             JsonNode root = objectMapper.readTree(response.getBody());
             return root
-                    .path("candidates").get(0)
+                    .path("choices").get(0)
+                    .path("message")
                     .path("content")
-                    .path("parts").get(0)
-                    .path("text")
                     .asText("Could not generate plan. Please try again.");
 
         } catch (Exception e) {
-            log.error("[StudyPlan] Gemini API error: {}", e.getMessage());
+            log.error("[StudyPlan] Groq API error: {}", e.getMessage());
             throw new RuntimeException("Failed to generate study plan. Please try again.");
         }
     }

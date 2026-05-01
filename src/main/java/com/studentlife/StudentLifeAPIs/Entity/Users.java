@@ -58,6 +58,10 @@ public class Users implements UserDetails {
     @Column(name = "academic_year")
     private String academicYear;
 
+    // Add this field inside Users.java, after the existing fields
+    @Column(name = "onesignal_player_id")
+    private String oneSignalPlayerId;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",

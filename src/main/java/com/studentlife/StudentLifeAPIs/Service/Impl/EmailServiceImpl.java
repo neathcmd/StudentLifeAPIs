@@ -28,7 +28,7 @@ public class EmailServiceImpl implements EmailService {
             String token
     ) {
         String acceptUrl = frontendUrl + "/invite/accept?token=" + token;
-        String declineUrl = frontendUrl + "/invite/accept?token=" + token;
+        String declineUrl = frontendUrl + "/invite/decline?token=" + token;
 
         String html = """
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e0e0e0; border-radius: 8px;">

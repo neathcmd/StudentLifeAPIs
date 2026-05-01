@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -15,7 +16,8 @@ public class AssignmentResponse {
     private String title;
     private String description;
     private String subject;
-    private Date dueDate;
+    private LocalDateTime startDate;
+    private LocalDateTime dueDate;
     private AssignmentStatus status;
     private Integer progress;
 

@@ -183,13 +183,13 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     @Transactional
-    public Long createAssignmentSchedule(String title, String description, LocalDateTime dueDate, Long assignmentId, Users user) {
+    public Long createAssignmentSchedule(String title, String description, LocalDateTime startDate, LocalDateTime dueDate, Long assignmentId, Users user) {
         Schedules event = Schedules.builder()
                 .title(title)
                 .description(description)
                 .type(ScheduleType.ONE_TIME)
-                .startTime(dueDate.minusHours(1))
-                .endTime(dueDate)
+                .startTime(startDate.toLocalDate().atTime(8, 0))
+                .endTime(dueDate.toLocalDate().atTime(23, 59))
                 .isImportant(true)
                 .assignmentId(assignmentId)
                 .user(user)

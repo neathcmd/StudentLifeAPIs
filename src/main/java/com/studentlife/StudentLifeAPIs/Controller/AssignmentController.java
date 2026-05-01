@@ -73,32 +73,32 @@ public class AssignmentController {
         return ResponseEntity.ok(assignmentService.deleteAssignment(id));
     }
 
-    @PostMapping("/{id}/invite")
+    @PostMapping("/{assignmentId}/invite")
     public ResponseEntity<ApiResponse<?>> invite(
-            @PathVariable Long id,
+            @PathVariable Long assignmentId,
             @Valid @RequestBody InviteRequest request
     ) {
-        return ResponseEntity.ok(assignmentService.inviteUser(id, request));
+        return ResponseEntity.ok(assignmentService.inviteUser(assignmentId, request));
     }
 
-    @PostMapping("/{id}/accept")
+    @PostMapping("/{assignmentId}/accept")
     public ResponseEntity<ApiResponse<?>> accept(
-            @PathVariable Long id
+            @PathVariable Long assignmentId
     ) {
-        return ResponseEntity.ok(assignmentService.acceptInvite(id));
+        return ResponseEntity.ok(assignmentService.acceptInvite(assignmentId));
     }
 
-    @PostMapping("/{id}/decline")
+    @PostMapping("/{assignmentId}/decline")
     public ResponseEntity<ApiResponse<?>> decline(
-            @PathVariable Long id
+            @PathVariable Long assignmentId
     ) {
-        return ResponseEntity.ok(assignmentService.declineInvite(id));
+        return ResponseEntity.ok(assignmentService.declineInvite(assignmentId));
     }
 
-    @GetMapping("/{id}/members")
+    @GetMapping("/{assignmentId}/members")
     public ResponseEntity<ApiResponse<List<AssignmentMemberResponse>>> getMembers(
-            @PathVariable Long id
+            @PathVariable Long assignmentId
     ) {
-        return ResponseEntity.ok(assignmentService.getMembers(id));
+        return ResponseEntity.ok(assignmentService.getMembers(assignmentId));
     }
 }

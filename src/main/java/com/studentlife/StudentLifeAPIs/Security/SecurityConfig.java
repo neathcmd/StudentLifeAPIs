@@ -48,11 +48,11 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(
-                                        "/ws/**",          // ✅ Allow WebSocket handshake
-                                        "/ws/websocket/**" // ✅ Allow SockJS fallback
+                                        "/api/v1/ws/**",          // ✅ Allow WebSocket handshake
+                                        "/api/v1/ws/websocket/**" // ✅ Allow SockJS fallback
                                 ).permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/health").permitAll()
                                 .requestMatchers("/invite/accept", "invite/decline").permitAll()
                                 .requestMatchers("/api/v1/me").authenticated()
                                 .requestMatchers("/api/v1/schedule/**").hasRole("student")
@@ -87,13 +87,19 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "https://student-life-platform.vercel.app",
                 "http://127.0.0.1:5500"
+
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 
         config.setAllowCredentials(true);
 
-        config.setAllowedHeaders(List.of("*"));
+//        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of(
+                "Authorization", "Content-Type", "Accept",
+                "Origin", "X-Requested-With", "Cookie"
+        ));
+        config.setExposedHeaders(List.of("Set-Cookie"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

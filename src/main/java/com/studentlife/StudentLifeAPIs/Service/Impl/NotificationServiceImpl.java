@@ -9,7 +9,7 @@ import com.studentlife.StudentLifeAPIs.Enum.NotificationType;
 import com.studentlife.StudentLifeAPIs.Mapper.NotificationMapper;
 import com.studentlife.StudentLifeAPIs.Repository.NotificationRepository;
 import com.studentlife.StudentLifeAPIs.Service.NotificationService;
-import com.studentlife.StudentLifeAPIs.Utils.AuthUtil;
+import com.studentlife.StudentLifeAPIs.Service.OneSignalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
     private final SimpMessagingTemplate messagingTemplate;
+    private final OneSignalService oneSignalService;
 
     @Override
     @Transactional
@@ -41,6 +42,12 @@ public class NotificationServiceImpl implements NotificationService {
 
 //        Push real-time via WebSocket
         sendRealTimeNotification(recipient.getId(), response);
+
+        oneSignalService.sendPushToUser(
+                recipient.getOneSignalPlayerId(),
+                request.getTitle(),
+                request.getMessage()
+        );
 
         return new ApiResponse<>(
                 200,
