@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
-    private final JwtService jwtService;               // ← JwtService not JwtUtil
+    private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
     @Override
