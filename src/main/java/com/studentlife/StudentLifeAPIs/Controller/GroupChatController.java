@@ -6,7 +6,6 @@ import com.studentlife.StudentLifeAPIs.DTO.Response.GroupMessageResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.GroupResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.MemberResponse;
 import com.studentlife.StudentLifeAPIs.Service.GroupChatService;
-import com.studentlife.StudentLifeAPIs.Service.PresenceService;
 import com.studentlife.StudentLifeAPIs.Utils.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

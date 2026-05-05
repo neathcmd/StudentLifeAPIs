@@ -67,6 +67,7 @@ public class Schedules {
     private String location;
 
     // Added: lets students mark high-priority events with a star
+    @Builder.Default
     @Column(name = "is_important", nullable = false)
     private boolean isImportant = false;
 

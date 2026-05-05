@@ -1,7 +1,5 @@
 package com.studentlife.StudentLifeAPIs.DTO.Request;
 
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data

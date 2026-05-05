@@ -6,7 +6,6 @@ import com.studentlife.StudentLifeAPIs.DTO.Request.UpdateProgressRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.AssignmentMemberResponse;
 import com.studentlife.StudentLifeAPIs.DTO.Response.AssignmentResponse;
-import com.studentlife.StudentLifeAPIs.Scheduler.AssignmentReminderScheduler;
 import com.studentlife.StudentLifeAPIs.Service.AssignmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,6 @@ import java.util.List;
 public class AssignmentController {
 
     private final AssignmentService assignmentService;
-    private final AssignmentReminderScheduler assignmentReminderScheduler;
 
     @PostMapping
     public ResponseEntity<ApiResponse<AssignmentResponse>> create(

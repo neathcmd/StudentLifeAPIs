@@ -3,9 +3,6 @@ package com.studentlife.StudentLifeAPIs.Mapper;
 import com.studentlife.StudentLifeAPIs.Entity.Roles;
 import org.mapstruct.Mapper;
 
-import java.util.List;
-import java.util.Set;
-
 @Mapper(config = MapperConfiguration.class)
 public interface RoleMapper {
 

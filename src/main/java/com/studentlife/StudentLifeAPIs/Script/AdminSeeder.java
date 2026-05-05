@@ -21,6 +21,7 @@ import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.n
 @Component
 @RequiredArgsConstructor
 @Order(2)
+@SuppressWarnings("null")
 public class AdminSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;

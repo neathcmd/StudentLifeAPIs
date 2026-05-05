@@ -21,5 +21,6 @@ public interface AssignmentMapper {
 
     // ── Entity → Response ─────────────────────────────────────────────────────
 
+    @Mapping(target = "scheduleId", ignore = true)
     AssignmentResponse toResponse(Assignments assignment);
 }

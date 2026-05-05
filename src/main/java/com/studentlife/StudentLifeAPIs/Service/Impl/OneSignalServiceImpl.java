@@ -12,6 +12,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
+@SuppressWarnings("null")
 public class OneSignalServiceImpl implements OneSignalService {
 
     @Value("${onesignal.app-id}")
