@@ -20,15 +20,19 @@ public interface ScheduleMapper {
     @Mapping(target = "user",                ignore = true)
     @Mapping(target = "createdAt",           ignore = true)
     @Mapping(target = "updatedAt",           ignore = true)
+    @Mapping(target = "assignmentId",        ignore = true)
+    @Mapping(target = "isImportant",         ignore = true)
     Schedules toEntityFromOneTime(OneTimeScheduleRequest request);
 
-    @Mapping(target = "type",      constant = "RECURRING")
-    @Mapping(target = "startTime", ignore = true)
-    @Mapping(target = "endTime",   ignore = true)
-    @Mapping(target = "id",        ignore = true)
-    @Mapping(target = "user",      ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "type",         constant = "RECURRING")
+    @Mapping(target = "startTime",    ignore = true)
+    @Mapping(target = "endTime",      ignore = true)
+    @Mapping(target = "id",           ignore = true)
+    @Mapping(target = "user",         ignore = true)
+    @Mapping(target = "createdAt",    ignore = true)
+    @Mapping(target = "updatedAt",    ignore = true)
+    @Mapping(target = "assignmentId", ignore = true)
+    @Mapping(target = "isImportant",  ignore = true)
     Schedules toEntityFromRecurring(RecurringScheduleRequest request);
 
     // ── Entity → Response ─────────────────────────────────────────────────────

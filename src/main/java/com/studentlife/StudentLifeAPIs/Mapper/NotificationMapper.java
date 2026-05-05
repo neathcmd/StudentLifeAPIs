@@ -12,13 +12,15 @@ import java.util.List;
 public interface NotificationMapper {
 
     @Mapping(source = "recipient.id", target = "recipientId")
+    @Mapping(source = "read", target = "isRead")
     NotificationResponse toResponse(Notification notification);
 
     List<NotificationResponse> toResponseList(List<Notification> notifications);
 
-    @Mapping(target = "recipient", ignore = true)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "isRead", constant = "false")
+    @Mapping(target = "recipient",  ignore = true)
+    @Mapping(target = "id",         ignore = true)
+    @Mapping(target = "createdAt",  ignore = true)
+    @Mapping(target = "isRead",     constant = "false")
+    @Mapping(target = "type",       ignore = true)
     Notification toEntity(NotificationRequest request);
 }

@@ -19,6 +19,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Order(4)
+@SuppressWarnings("null")
 public class ScheduleSeeder implements CommandLineRunner {
 
     private final ScheduleRepository scheduleRepository;

@@ -27,6 +27,7 @@ import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.*
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class ScheduleServiceImpl implements ScheduleService {
 
     private final ScheduleRepository scheduleRepository;

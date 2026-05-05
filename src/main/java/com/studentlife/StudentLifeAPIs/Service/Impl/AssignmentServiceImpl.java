@@ -36,6 +36,7 @@ import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.*
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class AssignmentServiceImpl implements AssignmentService {
 
     private final GroupChatMemberRepository groupChatMemberRepository;

@@ -30,6 +30,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class StudyPlanServiceImpl implements StudyPlanService {
 
     private final AssignmentRepository assignmentRepository;

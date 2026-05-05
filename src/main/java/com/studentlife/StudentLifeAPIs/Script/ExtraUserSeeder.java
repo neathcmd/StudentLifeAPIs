@@ -19,6 +19,7 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 @Order(3)
+@SuppressWarnings("null")
 public class ExtraUserSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;

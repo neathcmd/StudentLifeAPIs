@@ -9,7 +9,6 @@ import com.studentlife.StudentLifeAPIs.Enum.NotificationType;
 import com.studentlife.StudentLifeAPIs.Mapper.GroupMessageMapper;
 import com.studentlife.StudentLifeAPIs.Repository.AssignmentMemberRepository;
 import com.studentlife.StudentLifeAPIs.Repository.AssignmentRepository;
-import com.studentlife.StudentLifeAPIs.Repository.GroupChatMemberRepository;
 import com.studentlife.StudentLifeAPIs.Repository.GroupMessageRepository;
 import com.studentlife.StudentLifeAPIs.Service.GroupChatService;
 import com.studentlife.StudentLifeAPIs.Service.NotificationService;
@@ -42,6 +41,7 @@ import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.n
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class GroupChatServiceImpl implements GroupChatService {
 
     private final GroupMessageRepository groupMessageRepository;
@@ -52,7 +52,6 @@ public class GroupChatServiceImpl implements GroupChatService {
     private final GroupMessageMapper groupMessageMapper;
     private final OneSignalService oneSignalService;
     private final NotificationService notificationService;
-    private final GroupChatMemberRepository groupChatMemberRepository;
     private final PresenceService presenceService;
 
     // Returns all group chats the current user has access to
@@ -335,6 +334,7 @@ public class GroupChatServiceImpl implements GroupChatService {
         broadcastPresence(assignmentId);
     }
 
+    @Override
     public void userLeft(Long assignmentId, Long userId, String username) {
         presenceService.userLeft(assignmentId, userId);
         broadcastPresence(assignmentId);

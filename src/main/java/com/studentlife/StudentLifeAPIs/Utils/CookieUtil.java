@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 
 @Component
+@SuppressWarnings("null")
 public class CookieUtil {
 
     @Value("${spring.access-token-expire}")

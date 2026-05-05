@@ -25,6 +25,7 @@ import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.n
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;

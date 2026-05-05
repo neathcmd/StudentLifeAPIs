@@ -5,7 +5,6 @@ import com.studentlife.StudentLifeAPIs.Entity.ReminderLog;
 import com.studentlife.StudentLifeAPIs.Enum.AssignmentStatus;
 import com.studentlife.StudentLifeAPIs.Repository.AssignmentRepository;
 import com.studentlife.StudentLifeAPIs.Repository.ReminderLogRepository;
-import com.studentlife.StudentLifeAPIs.Service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +30,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class AssignmentReminderScheduler {
 
     private final AssignmentRepository    assignmentRepository;
@@ -108,7 +108,6 @@ public class AssignmentReminderScheduler {
 
     private void sendReminderEmail(Assignments assignment, String timeLabel) {
         String toEmail    = assignment.getUser().getEmail();
-        String fullname       = assignment.getUser().getFullname();
         String title      = assignment.getTitle();
         String subject    = assignment.getSubject();
         String dueFormatted = assignment.getDueDate().format(DISPLAY_FMT);

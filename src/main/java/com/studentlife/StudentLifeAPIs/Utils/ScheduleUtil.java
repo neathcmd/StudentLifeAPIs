@@ -14,10 +14,10 @@ import static com.studentlife.StudentLifeAPIs.Exception.ErrorsExceptionFactory.v
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class ScheduleUtil {
 
     private final ScheduleRepository scheduleRepository;
-    private final AuthUtil authUtil;
 
     public Schedules findScheduleAndCheckOwnership(Long scheduleId, Long userId) {
         Schedules schedule = scheduleRepository.findById(scheduleId)

@@ -2,6 +2,7 @@ package com.studentlife.StudentLifeAPIs.Config;
 
 import com.studentlife.StudentLifeAPIs.Jwt.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -15,13 +16,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
     @Override
-    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+    public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
         StompHeaderAccessor accessor =
                 MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 

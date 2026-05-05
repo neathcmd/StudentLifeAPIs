@@ -2,7 +2,6 @@ package com.studentlife.StudentLifeAPIs.Controller;
 
 import com.studentlife.StudentLifeAPIs.DTO.Request.UserUpdateRequest;
 import com.studentlife.StudentLifeAPIs.DTO.Response.ApiResponse;
-import com.studentlife.StudentLifeAPIs.DTO.Response.UserResponse;
 import com.studentlife.StudentLifeAPIs.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
